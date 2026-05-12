@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: #F8FAFB;
+    color: #2D4A5E;
+    font-family: 'Open Sans', system-ui, sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    color: #2D4A5E;
+  }
+
+  input, select, textarea {
+    background-color: #FFFFFF;
+    color: #2D4A5E;
+    border: 1.5px solid #E4ECF2;
+    border-radius: 10px;
+    padding: 9px 13px;
+    width: 100%;
+    font-size: 14px;
+    font-family: 'Open Sans', system-ui, sans-serif;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: #7DB8E0;
+    box-shadow: 0 0 0 3px rgba(74, 143, 193, 0.12);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #8FA3B1;
+  }
+
+  select option {
+    background: #FFFFFF;
+    color: #2D4A5E;
+  }
+}
+
+@layer components {
+  /* Botões */
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold
+           transition-all duration-150 cursor-pointer border-0 select-none;
+    font-family: 'Montserrat', system-ui, sans-serif;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white;
+    background-color: #4A8FC1;
+    box-shadow: 0 1px 3px rgba(74, 143, 193, 0.20);
+  }
+  .btn-primary:hover { background-color: #3A7AB0; }
+
+  .btn-secondary {
+    @apply btn bg-white text-text border border-border shadow-sm;
+  }
+  .btn-secondary:hover { background-color: #F0F6FC; }
+
+  .btn-danger {
+    @apply btn bg-red-500 text-white shadow-sm;
+  }
+  .btn-danger:hover { background-color: #DC2626; }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-card border border-border rounded-2xl p-5;
+    box-shadow: 0 1px 4px rgba(45, 74, 94, 0.06), 0 4px 12px rgba(45, 74, 94, 0.04);
+  }
+
+  /* Tabelas */
+  .table-row-hover {
+    @apply transition-colors duration-100;
+  }
+  .table-row-hover:hover { background-color: #F0F6FC; }
+
+  /* Badges — pastel */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-green  { @apply badge; background-color: #DCFCE7; color: #166534; }
+  .badge-red    { @apply badge; background-color: #FEE2E2; color: #991B1B; }
+  .badge-orange { @apply badge; background-color: #FEF3C7; color: #92400E; }
+  .badge-blue   { @apply badge; background-color: #DBEAFE; color: #1E40AF; }
+
+  /* Forms */
+  .input-label { @apply block text-xs text-muted font-medium mb-1.5; }
+  .form-group  { @apply flex flex-col gap-1; }
+}
+
+/* Tremor — tema pastel claro */
+.tremor-Card-root {
+  background-color: #FFFFFF !important;
+  border-color: #E4ECF2 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 4px rgba(45,74,94,0.06), 0 4px 12px rgba(45,74,94,0.04) !important;
+}
+.tremor-Table-root thead tr {
+  background-color: #F8FAFB !important;
+  border-color: #E4ECF2 !important;
+}
+.tremor-Table-root tbody tr {
+  border-color: #E4ECF2 !important;
+}
+.tremor-Table-root th {
+  color: #8FA3B1 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
