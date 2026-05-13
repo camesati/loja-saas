@@ -3,115 +3,182 @@ import { useAuth } from "../context/AuthContext.jsx";
 import {
   LayoutDashboard, ShoppingCart, Package, Layers,
   Users, UserCheck, CreditCard, BarChart2, Settings,
-  LogOut, Menu, X, Store,
+  LogOut, Menu, X,
 } from "lucide-react";
 
 const NAV = [
-  { key: "dashboard", label: "Dashboard",    icon: LayoutDashboard },
-  { key: "pdv",       label: "PDV",          icon: ShoppingCart },
-  { key: "products",  label: "Produtos",     icon: Package },
-  { key: "stock",     label: "Estoque",      icon: Layers },
-  { key: "customers", label: "Clientes",     icon: Users },
-  { key: "sellers",   label: "Vendedores",   icon: UserCheck },
-  { key: "payments",  label: "Pagamentos",   icon: CreditCard },
-  { key: "reports",   label: "Relatórios",   icon: BarChart2 },
-  { key: "settings",  label: "Configurações",icon: Settings },
+  { key: "dashboard", label: "Dashboard",     icon: LayoutDashboard },
+  { key: "pdv",       label: "PDV",           icon: ShoppingCart },
+  { key: "products",  label: "Produtos",      icon: Package },
+  { key: "stock",     label: "Estoque",       icon: Layers },
+  { key: "customers", label: "Clientes",      icon: Users },
+  { key: "sellers",   label: "Vendedores",    icon: UserCheck },
+  { key: "payments",  label: "Pagamentos",    icon: CreditCard },
+  { key: "reports",   label: "Relatórios",    icon: BarChart2 },
+  { key: "settings",  label: "Configurações", icon: Settings },
 ];
 
 export default function Layout({ page, setPage, children }) {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hoveredKey, setHoveredKey] = useState(null);
 
   const email = user?.email || "";
   const initials = email.slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex h-screen bg-bg overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--c-bg)" }}>
+
       {/* Overlay mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 md:hidden"
-          style={{ background: "rgba(45, 74, 94, 0.25)" }}
           onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-20 md:hidden"
+          style={{ background: "rgba(42,63,82,0.20)", backdropFilter: "blur(2px)" }}
         />
       )}
 
-      {/* Sidebar — azul-lavanda pastel */}
+      {/* ── Sidebar ─────────────────────────────────────────────────────
+          Mobile: fixed, desliza com transform
+          Desktop (md+): static, parte do flex — sem md:ml necessário no main
+      ─────────────────────────────────────────────────────────────── */}
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-30 w-60 flex flex-col
-          border-r border-border
-          transform transition-transform duration-200
+          fixed md:static inset-y-0 left-0 z-30
+          w-[220px] shrink-0 flex flex-col
+          transition-transform duration-200 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
-        style={{ background: "#EDF3FB" }}
+        style={{
+          background: "#FFFFFF",
+          borderRight: "1.5px solid var(--c-border)",
+          boxShadow: "2px 0 16px rgba(26,46,61,0.05)",
+        }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "#D6E8F7" }}
-          >
-            <Store size={16} style={{ color: "#2C6FA8" }} />
+        <div style={{
+          padding: "20px 18px 16px",
+          borderBottom: "1.5px solid var(--c-border)",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}>
+          <div style={{
+            width: 34, height: 34,
+            borderRadius: "10px",
+            background: "linear-gradient(135deg, #EBF4FC 0%, #D0E6F7 100%)",
+            border: "1.5px solid #BDD4EA",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <span style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "20px",
+              fontStyle: "italic",
+              fontWeight: 400,
+              color: "#4A8FC1",
+              lineHeight: 1,
+              paddingBottom: "1px",
+            }}>C</span>
           </div>
-          <span
-            className="font-bold text-sm tracking-wide"
-            style={{ fontFamily: "'Montserrat', sans-serif", color: "#2C6FA8" }}
-          >
-            CAMESA
-          </span>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "17px",
+              fontWeight: 500,
+              color: "#1A2E3D",
+              letterSpacing: ".02em",
+              lineHeight: 1.15,
+            }}>Camesa</div>
+            <div style={{
+              fontSize: "9.5px",
+              color: "var(--c-muted)",
+              letterSpacing: ".10em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              marginTop: "1px",
+            }}>Gestão</div>
+          </div>
+
           <button
-            className="ml-auto md:hidden text-muted hover:text-text"
             onClick={() => setSidebarOpen(false)}
+            className="md:hidden"
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-muted)", padding: 4, display: "flex" }}
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-2 overflow-y-auto px-2">
-          {NAV.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => { setPage(key); setSidebarOpen(false); }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all duration-100 text-left mb-0.5"
-              style={
-                page === key
-                  ? {
-                      background: "#D6E8F7",
-                      color: "#2C6FA8",
-                      fontWeight: 600,
-                      fontFamily: "'Montserrat', sans-serif",
-                    }
-                  : { color: "#8FA3B1" }
-              }
-              onMouseEnter={e => {
-                if (page !== key) e.currentTarget.style.background = "#F0F6FC";
-                if (page !== key) e.currentTarget.style.color = "#2D4A5E";
-              }}
-              onMouseLeave={e => {
-                if (page !== key) e.currentTarget.style.background = "";
-                if (page !== key) e.currentTarget.style.color = "#8FA3B1";
-              }}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
+        <nav style={{ flex: 1, padding: "8px 10px", overflowY: "auto" }}>
+          {NAV.map(({ key, label, icon: Icon }) => {
+            const active = page === key;
+            const hovered = hoveredKey === key && !active;
+            return (
+              <button
+                key={key}
+                onClick={() => { setPage(key); setSidebarOpen(false); }}
+                onMouseEnter={() => setHoveredKey(key)}
+                onMouseLeave={() => setHoveredKey(null)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "9px",
+                  width: "100%",
+                  padding: "8px 12px",
+                  margin: "1px 0",
+                  borderRadius: "9px",
+                  fontSize: "13px",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: active ? 700 : 500,
+                  color: active ? "#4A8FC1" : hovered ? "#1A2E3D" : "#4E6A7E",
+                  background: active ? "#EBF4FC" : hovered ? "#F4F8FC" : "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  transition: "all .12s",
+                }}
+              >
+                <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
+                <span>{label}</span>
+                {active && (
+                  <span style={{
+                    marginLeft: "auto",
+                    width: 6, height: 6,
+                    borderRadius: "50%",
+                    background: "#4A8FC1",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }} />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        {/* User */}
-        <div className="border-t border-border p-4">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-              style={{ background: "#4A8FC1" }}
-            >
+        {/* Usuário */}
+        <div style={{ borderTop: "1.5px solid var(--c-border)", padding: "14px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
+            <div style={{
+              width: 30, height: 30,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #BDD4EA, #4A8FC1)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "11px", fontWeight: 700, color: "#fff",
+              flexShrink: 0,
+            }}>
               {initials}
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-text truncate">{email}</p>
-            </div>
+            <span style={{
+              fontSize: "12px", fontWeight: 600,
+              color: "var(--c-text)",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              flex: 1,
+            }}>
+              {email}
+            </span>
           </div>
           <button onClick={logout} className="btn-secondary btn-sm w-full justify-center">
             <LogOut size={13} />
@@ -120,26 +187,31 @@ export default function Layout({ page, setPage, children }) {
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── Main ──────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+
         {/* Topbar mobile */}
         <header
-          className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border"
-          style={{ background: "#EDF3FB" }}
+          className="md:hidden flex items-center gap-3"
+          style={{
+            padding: "12px 16px",
+            background: "#fff",
+            borderBottom: "1.5px solid var(--c-border)",
+            flexShrink: 0,
+          }}
         >
-          <button onClick={() => setSidebarOpen(true)} className="text-muted hover:text-text">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-muted)", padding: 4, display: "flex" }}
+          >
             <Menu size={20} />
           </button>
-          <span
-            className="text-sm font-semibold text-text"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "14px", color: "var(--c-text)" }}>
             {NAV.find(n => n.key === page)?.label || "Dashboard"}
           </span>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main style={{ flex: 1, overflowY: "auto", padding: "22px 26px" }}>
           {children}
         </main>
       </div>

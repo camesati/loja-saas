@@ -8,19 +8,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg:     "#F8FAFB",
+        bg:     "#F5F8FC",
         card:   "#FFFFFF",
-        border: "#E4ECF2",
-        text:   "#2D4A5E",
-        muted:  "#8FA3B1",
+        border: "#E2EAF2",
+        text:   "#1A2E3D",
+        muted:  "#4E6A7E",
         accent: "#4A8FC1",
       },
       fontFamily: {
-        sans:    ["'Open Sans'", "system-ui", "sans-serif"],
-        heading: ["'Montserrat'", "system-ui", "sans-serif"],
-      },
-      borderRadius: {
-        card: "16px",
+        display: ["'Cormorant Garamond'", "Georgia", "serif"],
+        sans:    ["'Nunito'", "system-ui", "sans-serif"],
       },
     },
   },

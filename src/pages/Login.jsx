@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { resetPassword } from "../config/supabase.js";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function Login() {
   const { login, register } = useAuth();
-  const [tab, setTab] = useState("login");
+  const [mode, setMode] = useState("login"); // login | register | recover
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -13,134 +13,206 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "", fullName: "" });
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
+  const reset = (m) => { setMode(m); setError(""); setSuccess(""); };
+
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError(""); setLoading(true);
+    e.preventDefault(); setError(""); setLoading(true);
     try { await login(form.email, form.password); }
     catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    setError(""); setLoading(true);
-    try {
-      await register(form.email, form.password, form.fullName);
-      setSuccess("Conta criada com sucesso!");
-    } catch (err) { setError(err.message); }
+    e.preventDefault(); setError(""); setLoading(true);
+    try { await register(form.email, form.password, form.fullName); setSuccess("Conta criada com sucesso!"); }
+    catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
 
   const handleRecover = async (e) => {
-    e.preventDefault();
-    setError(""); setLoading(true);
-    try {
-      await resetPassword(form.email);
-      setSuccess("Email de recuperação enviado!");
-    } catch (err) { setError(err.message); }
+    e.preventDefault(); setError(""); setLoading(true);
+    try { await resetPassword(form.email); setSuccess("Email de recuperação enviado!"); }
+    catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
 
-  const changeTab = (t) => { setTab(t); setError(""); setSuccess(""); };
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#F8FAFB" }}>
-      <div className="w-full max-w-sm">
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "var(--c-bg)",
+      backgroundImage: "radial-gradient(var(--c-border) 1px, transparent 1px)",
+      backgroundSize: "22px 22px",
+      padding: "24px",
+    }}>
 
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: "#D6E8F7" }}
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#2C6FA8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="9,22 9,12 15,12 15,22" stroke="#2C6FA8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      {/* Card principal */}
+      <div className="anim-in" style={{
+        width: "100%",
+        maxWidth: "400px",
+        background: "#fff",
+        borderRadius: "20px",
+        border: "1.5px solid var(--c-border)",
+        boxShadow: "0 4px 24px rgba(42,63,82,0.08), 0 1px 4px rgba(42,63,82,0.06)",
+        overflow: "hidden",
+      }}>
+
+        {/* Cabeçalho da marca */}
+        <div style={{
+          padding: "36px 36px 28px",
+          textAlign: "center",
+          borderBottom: "1.5px solid var(--c-border)",
+          background: "linear-gradient(160deg, #F5F8FC 0%, #FFFFFF 100%)",
+        }}>
+          {/* Monograma */}
+          <div style={{
+            width: 56, height: 56,
+            borderRadius: "16px",
+            background: "linear-gradient(135deg, #EBF4FC 0%, #D6E8F7 100%)",
+            border: "1.5px solid #C4D9ED",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 16px",
+            boxShadow: "0 2px 8px rgba(74,143,193,0.15)",
+          }}>
+            <span style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "28px",
+              fontStyle: "italic",
+              fontWeight: 400,
+              color: "#4A8FC1",
+              lineHeight: 1,
+            }}>C</span>
           </div>
-          <h1
-            className="text-xl font-bold"
-            style={{ fontFamily: "'Montserrat', sans-serif", color: "#2C6FA8" }}
-          >
-            CAMESA
-          </h1>
-          <p className="text-sm text-muted mt-1">Sistema de gestão</p>
+
+          {/* Wordmark */}
+          <div style={{
+            fontFamily: "var(--font-display)",
+            fontStyle: "italic",
+            fontSize: "28px",
+            fontWeight: 400,
+            color: "#2A3F52",
+            letterSpacing: ".03em",
+            lineHeight: 1,
+            marginBottom: 6,
+          }}>
+            Camesa
+          </div>
+          <div style={{
+            fontSize: "11px",
+            fontWeight: 600,
+            color: "var(--c-muted)",
+            letterSpacing: ".12em",
+            textTransform: "uppercase",
+          }}>
+            a cara da sua casa
+          </div>
         </div>
 
-        {/* Card */}
-        <div className="card">
-          {/* Tabs */}
-          <div className="flex border-b border-border mb-5 -mx-5 px-5">
-            {[["login","Entrar"],["register","Criar conta"],["recover","Recuperar"]].map(([k, l]) => (
-              <button
-                key={k}
-                onClick={() => changeTab(k)}
-                className="pb-3 text-sm mr-4 border-b-2 transition-colors"
-                style={
-                  tab === k
-                    ? { borderColor: "#4A8FC1", color: "#4A8FC1", fontWeight: 600 }
-                    : { borderColor: "transparent", color: "#8FA3B1" }
-                }
-              >
-                {l}
-              </button>
-            ))}
+        {/* Corpo do formulário */}
+        <div style={{ padding: "28px 36px 32px" }}>
+
+          {/* Título do modo */}
+          <div className="anim-in-1" style={{ marginBottom: 20 }}>
+            <h2 style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "var(--c-text)",
+              margin: 0,
+            }}>
+              {mode === "login"    && "Bem-vindo de volta"}
+              {mode === "register" && "Criar conta"}
+              {mode === "recover"  && "Recuperar acesso"}
+            </h2>
+            <p style={{ fontSize: "13px", color: "var(--c-muted)", margin: "4px 0 0" }}>
+              {mode === "login"    && "Acesse o painel de gestão"}
+              {mode === "register" && "Preencha os dados abaixo"}
+              {mode === "recover"  && "Enviaremos um link por email"}
+            </p>
           </div>
 
           {/* Alertas */}
           {error && (
-            <div
-              className="mb-4 px-4 py-3 rounded-xl text-sm"
-              style={{ background: "#FEE2E2", border: "1.5px solid #FECACA", color: "#991B1B" }}
-            >
+            <div className="anim-in" style={{
+              padding: "10px 14px",
+              background: "#FEE2E2",
+              border: "1.5px solid #FECACA",
+              borderRadius: "10px",
+              color: "#991B1B",
+              fontSize: "13px",
+              marginBottom: 16,
+            }}>
               {error}
             </div>
           )}
           {success && (
-            <div
-              className="mb-4 px-4 py-3 rounded-xl text-sm"
-              style={{ background: "#DCFCE7", border: "1.5px solid #BBF7D0", color: "#166534" }}
-            >
+            <div className="anim-in" style={{
+              padding: "10px 14px",
+              background: "#D1FAE5",
+              border: "1.5px solid #A7F3D0",
+              borderRadius: "10px",
+              color: "#065F46",
+              fontSize: "13px",
+              marginBottom: 16,
+            }}>
               {success}
             </div>
           )}
 
-          {/* Login */}
-          {tab === "login" && (
-            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          {/* ── Login ─────────────────────────────── */}
+          {mode === "login" && (
+            <form onSubmit={handleLogin} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="form-group">
                 <label className="input-label">Email</label>
                 <input type="email" value={form.email} onChange={set("email")} placeholder="seu@email.com" required />
               </div>
               <div className="form-group">
                 <label className="input-label">Senha</label>
-                <div className="relative">
+                <div style={{ position: "relative" }}>
                   <input
                     type={showPass ? "text" : "password"}
                     value={form.password}
                     onChange={set("password")}
                     placeholder="••••••••"
                     required
-                    style={{ paddingRight: "42px" }}
+                    style={{ paddingRight: "44px" }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
+                    style={{
+                      position: "absolute", right: 13, top: "50%", transform: "translateY(-50%)",
+                      background: "none", border: "none", cursor: "pointer",
+                      color: "var(--c-muted)", display: "flex", padding: 0,
+                    }}
                   >
-                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
-              <button type="submit" className="btn-primary w-full justify-center mt-1" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
+
+              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
+                {loading ? "Entrando..." : (<>Entrar <ArrowRight size={15} /></>)}
               </button>
+
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                <button type="button" onClick={() => reset("register")}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-accent)", fontWeight: 600, padding: 0 }}>
+                  Criar conta
+                </button>
+                <button type="button" onClick={() => reset("recover")}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", padding: 0 }}>
+                  Esqueceu a senha?
+                </button>
+              </div>
             </form>
           )}
 
-          {/* Cadastro */}
-          {tab === "register" && (
-            <form onSubmit={handleRegister} className="flex flex-col gap-4">
+          {/* ── Cadastro ──────────────────────────── */}
+          {mode === "register" && (
+            <form onSubmit={handleRegister} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="form-group">
                 <label className="input-label">Nome completo</label>
                 <input type="text" value={form.fullName} onChange={set("fullName")} placeholder="Seu nome" required />
@@ -153,24 +225,29 @@ export default function Login() {
                 <label className="input-label">Senha</label>
                 <input type="password" value={form.password} onChange={set("password")} placeholder="Mínimo 6 caracteres" required minLength={6} />
               </div>
-              <button type="submit" className="btn-primary w-full justify-center mt-1" disabled={loading}>
-                {loading ? "Criando conta..." : "Criar conta"}
+              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
+                {loading ? "Criando conta..." : (<>Criar conta <ArrowRight size={15} /></>)}
+              </button>
+              <button type="button" onClick={() => reset("login")}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", textAlign: "center", marginTop: 2 }}>
+                ← Voltar para o login
               </button>
             </form>
           )}
 
-          {/* Recuperar */}
-          {tab === "recover" && (
-            <form onSubmit={handleRecover} className="flex flex-col gap-4">
-              <p className="text-sm text-muted">
-                Informe seu email e enviaremos um link para redefinir sua senha.
-              </p>
+          {/* ── Recuperar ─────────────────────────── */}
+          {mode === "recover" && (
+            <form onSubmit={handleRecover} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="form-group">
-                <label className="input-label">Email</label>
+                <label className="input-label">Email cadastrado</label>
                 <input type="email" value={form.email} onChange={set("email")} placeholder="seu@email.com" required />
               </div>
-              <button type="submit" className="btn-primary w-full justify-center mt-1" disabled={loading}>
-                {loading ? "Enviando..." : "Enviar email"}
+              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
+                {loading ? "Enviando..." : (<>Enviar link <ArrowRight size={15} /></>)}
+              </button>
+              <button type="button" onClick={() => reset("login")}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", textAlign: "center", marginTop: 2 }}>
+                ← Voltar para o login
               </button>
             </form>
           )}

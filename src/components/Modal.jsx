@@ -3,44 +3,73 @@ import { useEffect } from "react";
 
 export default function Modal({ title, onClose, children, size = "md" }) {
   useEffect(() => {
-    const handler = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    const h = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
   }, [onClose]);
 
-  const widths = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" };
+  const maxW = { sm: "380px", md: "540px", lg: "720px", xl: "900px" }[size] || "540px";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(45, 74, 94, 0.22)" }}
-    >
-      <div
-        className={`bg-white w-full ${widths[size]} max-h-[90vh] flex flex-col rounded-2xl overflow-hidden`}
-        style={{
-          border: "1.5px solid #E4ECF2",
-          boxShadow: "0 8px 32px rgba(45, 74, 94, 0.12), 0 2px 8px rgba(45, 74, 94, 0.08)",
-        }}
-      >
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 50,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16,
+      background: "rgba(42,63,82,0.18)",
+      backdropFilter: "blur(4px)",
+    }}>
+      <div className="anim-in" style={{
+        background: "#fff",
+        border: "1.5px solid var(--c-border)",
+        borderRadius: "20px",
+        width: "100%",
+        maxWidth: maxW,
+        maxHeight: "90vh",
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 12px 48px rgba(42,63,82,0.14), 0 2px 8px rgba(42,63,82,0.06)",
+        overflow: "hidden",
+      }}>
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-border"
-        >
-          <h3
-            className="font-semibold text-text text-sm"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "18px 24px",
+          borderBottom: "1.5px solid var(--c-border)",
+          flexShrink: 0,
+        }}>
+          <h3 style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "15px",
+            fontWeight: 700,
+            color: "var(--c-text)",
+            margin: 0,
+          }}>
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-text transition-colors"
-            style={{ background: "#F8FAFB" }}
+            style={{
+              width: 28, height: 28,
+              borderRadius: "8px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#F5F8FC",
+              border: "1.5px solid var(--c-border)",
+              cursor: "pointer",
+              color: "var(--c-muted)",
+              transition: "all .15s",
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#E2EAF2"; e.currentTarget.style.color = "var(--c-text)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#F5F8FC"; e.currentTarget.style.color = "var(--c-muted)"; }}
           >
-            <X size={15} />
+            <X size={14} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 p-6">{children}</div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
+          {children}
+        </div>
       </div>
     </div>
   );
