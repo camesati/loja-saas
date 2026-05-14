@@ -61,16 +61,13 @@ export default function ArrowBarChart({ data, valueKey = "Vendas", height = 200,
             ref={barsAreaRef}
             style={{ height, position: "relative", display: "flex", alignItems: "flex-end", gap: 6 }}
           >
-            {/* Linhas de grade */}
-            {gridLines.map((_, i) => (
-              <div key={i} style={{
-                position: "absolute", left: 0, right: 0,
-                top: `${(i / steps) * 100}%`,
-                borderTop: i === steps ? "2px solid var(--c-muted)" : "1px solid var(--c-border)",
-                opacity: i === steps ? 0.35 : 0.30,
-                pointerEvents: "none",
-              }} />
-            ))}
+            {/* Linha de base (eixo X) */}
+            <div style={{
+              position: "absolute", left: 0, right: 0, bottom: 0,
+              borderTop: "1.5px solid var(--c-border)",
+              opacity: 0.4,
+              pointerEvents: "none",
+            }} />
 
             {/* Barras */}
             {data.map((item, i) => {
