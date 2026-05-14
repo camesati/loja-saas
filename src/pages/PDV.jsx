@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { db } from "../config/supabase.js";
 import { useToast } from "../components/Toast.jsx";
-import { Search, Plus, Minus, Trash2, CheckCircle, ShoppingCart } from "lucide-react";
+import { Search, Plus, Minus, Trash2, CheckCircle2, ShoppingCart } from "lucide-react";
 
 const fmt = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -122,19 +122,19 @@ export default function PDV() {
 
   if (done) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 20 }}>
-        <div style={{
-          width: 64, height: 64,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #D0F0F6, #EEF6FB)",
-          border: "2px solid #33B3CB",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <CheckCircle size={32} color="#0474AF" />
+      <div className="flex flex-col items-center justify-center gap-5 anim-in" style={{ minHeight: "60vh" }}>
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, var(--c-info-bg), var(--c-kpi-blue-bg))",
+            border: "2px solid var(--c-cyan)",
+          }}
+        >
+          <CheckCircle2 size={32} color="var(--c-accent)" />
         </div>
-        <div style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--c-text)", margin: 0 }}>Venda finalizada!</h2>
-          <p style={{ color: "var(--c-muted)", marginTop: 4, fontSize: "14px" }}>
+        <div className="text-center">
+          <h2 className="text-display">Venda finalizada!</h2>
+          <p className="text-sm-ui mt-1">
             Venda #{done.saleNumber} — <strong style={{ color: "var(--c-accent)" }}>{fmt(done.total)}</strong>
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function PDV() {
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-text">PDV — Ponto de Venda</h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Busca + Carrinho */}
         <div className="lg:col-span-2 space-y-3">
           {/* Busca */}
@@ -198,25 +198,40 @@ export default function PDV() {
             ) : (
               <div className="space-y-2">
                 {cart.map(item => (
-                  <div key={item.product_id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <div key={item.product_id} className="flex items-center gap-3 py-2 border-b border-border last:border-0 anim-in">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted">{item.sku}</p>
+                      <p className="text-mono">{item.sku}</p>
                       <p className="text-sm text-text truncate">{item.description}</p>
-                      <p className="text-xs text-accent">{fmt(item.unit_price)}</p>
+                      <p className="text-xs font-semibold" style={{ color: "var(--c-accent)" }}>{fmt(item.unit_price)}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => updateQty(item.product_id, -1)} className="w-7 h-7 rounded bg-[#EDF3FB] flex items-center justify-center text-muted hover:text-text">
+                      <button
+                        onClick={() => updateQty(item.product_id, -1)}
+                        aria-label={`Diminuir quantidade de ${item.description}`}
+                        className="flex items-center justify-center text-muted hover:text-text transition-colors rounded-md"
+                        style={{ width: 30, height: 30, background: "var(--c-kpi-blue-bg)", border: "none", cursor: "pointer" }}
+                      >
                         <Minus size={12} />
                       </button>
                       <span className="w-8 text-center text-sm text-text font-medium">{item.quantity}</span>
-                      <button onClick={() => updateQty(item.product_id, +1)} className="w-7 h-7 rounded bg-[#EDF3FB] flex items-center justify-center text-muted hover:text-text">
+                      <button
+                        onClick={() => updateQty(item.product_id, +1)}
+                        aria-label={`Aumentar quantidade de ${item.description}`}
+                        className="flex items-center justify-center text-muted hover:text-text transition-colors rounded-md"
+                        style={{ width: 30, height: 30, background: "var(--c-kpi-blue-bg)", border: "none", cursor: "pointer" }}
+                      >
                         <Plus size={12} />
                       </button>
                     </div>
                     <span className="text-sm font-semibold text-text shrink-0 w-20 text-right">
                       {fmt(item.unit_price * item.quantity)}
                     </span>
-                    <button onClick={() => removeItem(item.product_id)} className="text-red-500 hover:text-red-400 shrink-0">
+                    <button
+                      onClick={() => removeItem(item.product_id)}
+                      aria-label={`Remover ${item.description} do carrinho`}
+                      className="text-danger hover:opacity-70 transition-opacity shrink-0"
+                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-danger)" }}
+                    >
                       <Trash2 size={14} />
                     </button>
                   </div>

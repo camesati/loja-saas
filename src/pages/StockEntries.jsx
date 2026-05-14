@@ -85,39 +85,51 @@ export default function StockEntries() {
       </div>
 
       <div className="card overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["SKU","Descrição","Qtd","Custo Unit.","Total","Obs.","Data"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">SKU</th>
+              <th scope="col">Descrição</th>
+              <th scope="col" className="th-right">Qtd</th>
+              <th scope="col" className="th-right">Custo Unit.</th>
+              <th scope="col" className="th-right">Total</th>
+              <th scope="col">Obs.</th>
+              <th scope="col">Data</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(4)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-16" /></td>
+                  <td><div className="skeleton-text w-40" /></td>
+                  <td><div className="skeleton-text w-10 ml-auto" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                </tr>
+              ))
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center">
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Layers size={22} color="#0474AF" />
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <Layers size={22} color="var(--c-accent)" />
                     </div>
-                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhuma entrada registrada</p>
+                    <p className="text-sm-ui">Nenhuma entrada registrada</p>
                   </div>
                 </td>
               </tr>
             ) : filtered.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-muted font-mono text-xs">{r.sku}</td>
-                <td className="px-4 py-3 text-text">{r.description}</td>
-                <td className="px-4 py-3 text-accent font-semibold">+{r.quantity}</td>
-                <td className="px-4 py-3 text-muted">{fmt(r.unit_cost)}</td>
-                <td className="px-4 py-3 text-text font-medium">{fmt(r.quantity * r.unit_cost)}</td>
-                <td className="px-4 py-3 text-muted text-xs">{r.notes || "—"}</td>
-                <td className="px-4 py-3 text-muted text-xs">
-                  {new Date(r.created_at).toLocaleDateString("pt-BR")}
-                </td>
+              <tr key={r.id}>
+                <td className="td-mono">{r.sku}</td>
+                <td>{r.description}</td>
+                <td className="td-amount" style={{ color: "var(--c-success)" }}>+{r.quantity}</td>
+                <td className="td-amount">{fmt(r.unit_cost)}</td>
+                <td className="td-amount">{fmt(r.quantity * r.unit_cost)}</td>
+                <td className="td-muted">{r.notes || "—"}</td>
+                <td className="td-muted">{new Date(r.created_at).toLocaleDateString("pt-BR")}</td>
               </tr>
             ))}
           </tbody>
@@ -134,7 +146,7 @@ export default function StockEntries() {
                 {products.map(p => <option key={p.id} value={p.id}>{p.sku} — {p.description}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-group">
                 <label className="input-label">SKU *</label>
                 <input value={form.sku} onChange={set("sku")} required />

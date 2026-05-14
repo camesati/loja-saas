@@ -10,42 +10,34 @@ import {
 const fmt = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 const fmtDate = (d) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
-/* KPI Card */
-function KPICard({ icon: Icon, label, value, bg, iconColor, delay = 0 }) {
+const KPI_VARIANTS = [
+  { icon: TrendingUp,  label: "Vendas Hoje",      key: "hoje",     variant: "blue",   iconColor: "var(--c-accent)" },
+  { icon: ShoppingBag, label: "Vendas do Mês",    key: "mes",      variant: "green",  iconColor: "var(--c-success)" },
+  { icon: Package,     label: "Itens em Estoque", key: "estoque",  variant: "orange", iconColor: "var(--c-warning)" },
+  { icon: Users,       label: "Clientes",         key: "clientes", variant: "purple", iconColor: "#7C3AED" },
+];
+
+function KPICard({ icon: Icon, label, value, variant, iconColor, delay = 0 }) {
   return (
-    <div
-      className="card anim-in"
-      style={{ animationDelay: `${delay}ms`, display: "flex", alignItems: "center", gap: 16 }}
-    >
-      <div style={{
-        width: 44, height: 44,
-        borderRadius: "12px",
-        background: bg,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flexShrink: 0,
-      }}>
+    <div className={`kpi-card kpi-card--${variant} anim-in`} style={{ animationDelay: `${delay}ms` }}>
+      <div className="kpi-icon-wrap">
         <Icon size={20} color={iconColor} strokeWidth={2} />
       </div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: "12px", color: "var(--c-muted)", fontWeight: 600, marginBottom: 2 }}>
-          {label}
-        </div>
-        <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--c-text)", lineHeight: 1.2 }}>
-          {value}
-        </div>
+      <div className="min-w-0">
+        <div className="kpi-label">{label}</div>
+        <div className="kpi-value">{value}</div>
       </div>
     </div>
   );
 }
 
-/* Skeleton de KPI Card para loading */
 function KPISkeleton({ delay = 0 }) {
   return (
-    <div className="card" style={{ animationDelay: `${delay}ms`, display: "flex", alignItems: "center", gap: 16 }}>
-      <div className="skeleton" style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0 }} />
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div className="skeleton" style={{ height: 12, width: "60%", marginBottom: 8 }} />
-        <div className="skeleton" style={{ height: 22, width: "80%" }} />
+    <div className="card flex items-center gap-4" style={{ animationDelay: `${delay}ms` }}>
+      <div className="skeleton w-[42px] h-[42px] rounded-xl shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="skeleton-text w-3/5 mb-2" />
+        <div className="skeleton-title w-4/5" />
       </div>
     </div>
   );
@@ -108,7 +100,7 @@ export default function Dashboard({ setPage }) {
   const hasChart = chartData.some(d => d["Vendas"] > 0);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className="flex flex-col gap-section">
 
       {/* Cabeçalho */}
       <div className="anim-in">
@@ -117,44 +109,31 @@ export default function Dashboard({ setPage }) {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}
-           className="lg:grid-cols-4">
-        {loading ? (
-          <>
-            <KPISkeleton delay={0}   />
-            <KPISkeleton delay={60}  />
-            <KPISkeleton delay={120} />
-            <KPISkeleton delay={180} />
-          </>
-        ) : (
-          <>
-            <KPICard icon={TrendingUp}  label="Vendas Hoje"      value={fmt(kpi.hoje)}    bg="#EEF6FB" iconColor="#0474AF" delay={0}   />
-            <KPICard icon={ShoppingBag} label="Vendas do Mês"    value={fmt(kpi.mes)}     bg="#F0FDF4" iconColor="#16A34A" delay={60}  />
-            <KPICard icon={Package}     label="Itens em Estoque" value={kpi.estoque}      bg="#FEF9EC" iconColor="#D97706" delay={120} />
-            <KPICard icon={Users}       label="Clientes"         value={kpi.clientes}     bg="#F3F0FE" iconColor="#7C3AED" delay={180} />
-          </>
-        )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {loading
+          ? KPI_VARIANTS.map((_, i) => <KPISkeleton key={i} delay={i * 60} />)
+          : KPI_VARIANTS.map((v, i) => (
+              <KPICard key={v.key} {...v} value={v.key === "estoque" || v.key === "clientes" ? kpi[v.key] : fmt(kpi[v.key])} delay={i * 60} />
+            ))
+        }
       </div>
 
       {/* Gráfico + Últimas vendas */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}
-           className="lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] gap-3.5">
 
         {/* Card do gráfico */}
-        <div className="card anim-in-1" style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div className="card anim-in-1 flex flex-col">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--c-text)" }}>
-                Vendas — últimos 7 dias
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--c-muted)", marginTop: 2 }}>
+              <div className="text-h3">Vendas — últimos 7 dias</div>
+              <div className="text-sm-ui mt-0.5">
                 Total: {loading ? "—" : fmt(chartData.reduce((s, d) => s + d["Vendas"], 0))}
               </div>
             </div>
           </div>
 
           {loading ? (
-            <div className="skeleton" style={{ height: 224, borderRadius: 10 }} />
+            <div className="skeleton" style={{ height: 224, borderRadius: "var(--radius-md)" }} />
           ) : hasChart ? (
             <BarChart
               data={chartData}
@@ -164,106 +143,76 @@ export default function Dashboard({ setPage }) {
               valueFormatter={(v) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
               showLegend={false}
               showGridLines={true}
-              className="h-56 chart-brand"
+              className="h-56"
             />
           ) : (
-            <div style={{
-              height: 224,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-            }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 14,
-                background: "#EEF6FB",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <BarChart2 size={22} color="#0474AF" />
+            <div className="h-56 flex flex-col items-center justify-center gap-2.5">
+              <div className="kpi-icon-wrap kpi-card--blue">
+                <BarChart2 size={22} color="var(--c-accent)" />
               </div>
-              <span style={{ fontSize: "13px", color: "var(--c-muted)", fontWeight: 500 }}>
-                Nenhuma venda nos últimos 7 dias
-              </span>
+              <span className="text-sm-ui font-medium">Nenhuma venda nos últimos 7 dias</span>
             </div>
           )}
         </div>
 
         {/* Últimas vendas */}
-        <div className="card anim-in-2" style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--c-text)" }}>
-              Últimas vendas
-            </div>
+        <div className="card anim-in-2 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-h3">Últimas vendas</div>
             <button
               onClick={() => setPage("reports")}
-              style={{
-                display: "flex", alignItems: "center", gap: 3,
-                fontSize: "12px", color: "var(--c-accent)",
-                background: "none", border: "none", cursor: "pointer",
-                fontWeight: 600, padding: 0,
-              }}
+              className="flex items-center gap-1 text-accent text-xs font-semibold hover:text-accent-deep transition-colors"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
             >
               Ver todas <ArrowRight size={12} />
             </button>
           </div>
 
           {loading ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="flex flex-col gap-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="skeleton" style={{ height: 13, width: "70%", marginBottom: 6 }} />
-                    <div className="skeleton" style={{ height: 11, width: "50%" }} />
+                <div key={i} className="flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="skeleton-text w-[70%] mb-1.5" />
+                    <div className="skeleton-text w-[50%]" style={{ height: 11 }} />
                   </div>
-                  <div className="skeleton" style={{ height: 14, width: 70 }} />
+                  <div className="skeleton-text w-[70px]" />
                 </div>
               ))}
             </div>
           ) : recentSales.length === 0 ? (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 14,
-                background: "#EEF6FB",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <Clock size={22} color="#0474AF" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-2.5">
+              <div className="kpi-icon-wrap kpi-card--blue">
+                <Clock size={22} color="var(--c-accent)" />
               </div>
-              <span style={{ fontSize: "13px", color: "var(--c-muted)", fontWeight: 500 }}>
-                Nenhuma venda ainda
-              </span>
+              <span className="text-sm-ui font-medium">Nenhuma venda ainda</span>
               <button className="btn-primary btn-sm" onClick={() => setPage("pdv")}>
                 Fazer primeira venda
               </button>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <div className="flex flex-col flex-1">
               {recentSales.map((s, i) => (
                 <div
                   key={s.id}
+                  className="flex items-center justify-between gap-3"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
                     padding: "10px 0",
                     borderBottom: i < recentSales.length - 1 ? "1px solid var(--c-border)" : "none",
-                    gap: 12,
                   }}
                 >
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--c-text)" }}>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-semibold text-text">
                       #{s.sale_number}
                       {s.customers?.name && (
-                        <span style={{ fontWeight: 400, color: "var(--c-muted)", marginLeft: 6 }}>
-                          · {s.customers.name}
-                        </span>
+                        <span className="font-normal text-muted ml-1.5">· {s.customers.name}</span>
                       )}
                     </div>
-                    <div style={{ fontSize: "11px", color: "var(--c-muted)", marginTop: 1 }}>
+                    <div className="text-xs text-muted mt-px">
                       {fmtDate(s.created_at)} · {s.payment_methods?.name || "—"}
                     </div>
                   </div>
-                  <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--c-accent)", flexShrink: 0 }}>
+                  <div className="text-[13px] font-bold shrink-0" style={{ color: "var(--c-accent)" }}>
                     {fmt(s.total_amount)}
                   </div>
                 </div>
@@ -274,55 +223,32 @@ export default function Dashboard({ setPage }) {
       </div>
 
       {/* Acesso rápido */}
-      <div className="card anim-in-3" style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-        <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--c-text)", flexShrink: 0 }}>
-          Acesso rápido
-        </span>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {/* Nova Venda — CTA principal com cor sólida */}
+      <div className="card anim-in-3 flex flex-wrap items-center gap-4">
+        <span className="text-h3 shrink-0">Acesso rápido</span>
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setPage("pdv")}
-            style={{
-              padding: "7px 16px",
-              borderRadius: "9px",
-              fontSize: "12.5px",
-              fontWeight: 700,
-              background: "var(--c-accent)",
-              color: "#fff",
-              border: "1.5px solid var(--c-accent)",
-              cursor: "pointer",
-              transition: "all .15s",
-              fontFamily: "var(--font-sans)",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "var(--c-accent-deep)"; e.currentTarget.style.borderColor = "var(--c-accent-deep)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "var(--c-accent)"; e.currentTarget.style.borderColor = "var(--c-accent)"; }}
+            className="btn-primary btn-sm"
           >
             Nova Venda
           </button>
           {[
-            ["products",  "Produtos",  "#F0FDF4", "#16A34A"],
-            ["customers", "Clientes",  "#F3F0FE", "#7C3AED"],
-            ["stock",     "Estoque",   "#FEF9EC", "#D97706"],
-          ].map(([p, l, bg, color]) => (
+            { page: "products",  label: "Produtos",  bg: "var(--c-kpi-green-bg)",  color: "var(--c-success)" },
+            { page: "customers", label: "Clientes",  bg: "var(--c-kpi-purple-bg)", color: "#7C3AED" },
+            { page: "stock",     label: "Estoque",   bg: "var(--c-kpi-orange-bg)", color: "var(--c-warning)" },
+          ].map(({ page: p, label, bg, color }) => (
             <button
               key={p}
               onClick={() => setPage(p)}
+              className="btn-sm transition-all"
               style={{
-                padding: "7px 14px",
-                borderRadius: "9px",
-                fontSize: "12.5px",
-                fontWeight: 600,
-                background: bg,
-                color: color,
-                border: "1.5px solid transparent",
-                cursor: "pointer",
-                transition: "all .15s",
-                fontFamily: "var(--font-sans)",
+                background: bg, color, border: "1.5px solid transparent",
+                fontFamily: "var(--font-sans)", cursor: "pointer",
               }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = color; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "transparent"; }}
             >
-              {l}
+              {label}
             </button>
           ))}
         </div>

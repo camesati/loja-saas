@@ -37,75 +37,48 @@ export default function Login() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--c-bg)",
-      backgroundImage: "radial-gradient(var(--c-border) 1px, transparent 1px)",
-      backgroundSize: "22px 22px",
-      padding: "24px",
-    }}>
-
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        background: "var(--c-bg)",
+        backgroundImage: "radial-gradient(var(--c-border) 1px, transparent 1px)",
+        backgroundSize: "22px 22px",
+      }}
+    >
       {/* Card principal */}
-      <div className="anim-in" style={{
-        width: "100%",
-        maxWidth: "400px",
-        background: "#fff",
-        borderRadius: "20px",
-        border: "1.5px solid var(--c-border)",
-        boxShadow: "0 4px 24px rgba(42,63,82,0.08), 0 1px 4px rgba(42,63,82,0.06)",
-        overflow: "hidden",
-      }}>
-
+      <div
+        className="card anim-in w-full overflow-hidden"
+        style={{ maxWidth: "400px", borderRadius: "var(--radius-2xl)", padding: 0,
+          boxShadow: "0 4px 24px rgba(42,63,82,0.08), 0 1px 4px rgba(42,63,82,0.06)" }}
+      >
         {/* Cabeçalho da marca */}
-        <div style={{
-          padding: "36px 36px 28px",
-          textAlign: "center",
-          borderBottom: "1.5px solid var(--c-border)",
-          background: "linear-gradient(160deg, #F5F8FC 0%, #FFFFFF 100%)",
-        }}>
+        <div
+          className="text-center border-b border-border"
+          style={{ padding: "36px 36px 28px",
+            background: "linear-gradient(160deg, var(--c-bg) 0%, var(--c-card) 100%)" }}
+        >
           {/* Monograma */}
-          <div style={{
-            width: 56, height: 56,
-            borderRadius: "16px",
-            background: "linear-gradient(135deg, #EBF4FC 0%, #D6E8F7 100%)",
-            border: "1.5px solid #C4D9ED",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px",
-            boxShadow: "0 2px 8px rgba(74,143,193,0.15)",
-          }}>
-            <span style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "28px",
-              fontStyle: "italic",
-              fontWeight: 400,
-              color: "#4A8FC1",
-              lineHeight: 1,
-            }}>C</span>
+          <div
+            className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 border border-border"
+            style={{
+              background: "var(--c-kpi-blue-bg)",
+              boxShadow: "0 2px 8px rgba(4,116,175,0.12)",
+            }}
+          >
+            <span
+              className="font-display text-[28px] italic leading-none"
+              style={{ color: "var(--c-accent)", fontWeight: 400 }}
+            >C</span>
           </div>
 
           {/* Wordmark */}
-          <div style={{
-            fontFamily: "var(--font-display)",
-            fontStyle: "italic",
-            fontSize: "28px",
-            fontWeight: 400,
-            color: "#2A3F52",
-            letterSpacing: ".03em",
-            lineHeight: 1,
-            marginBottom: 6,
-          }}>
+          <div
+            className="font-display text-[28px] italic leading-none mb-1.5"
+            style={{ color: "var(--c-accent-deep)", fontWeight: 400, letterSpacing: ".03em" }}
+          >
             Camesa
           </div>
-          <div style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            color: "var(--c-muted)",
-            letterSpacing: ".12em",
-            textTransform: "uppercase",
-          }}>
+          <div className="text-label" style={{ letterSpacing: ".12em" }}>
             a cara da sua casa
           </div>
         </div>
@@ -114,19 +87,13 @@ export default function Login() {
         <div style={{ padding: "28px 36px 32px" }}>
 
           {/* Título do modo */}
-          <div className="anim-in-1" style={{ marginBottom: 20 }}>
-            <h2 style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "var(--c-text)",
-              margin: 0,
-            }}>
+          <div className="anim-in-1 mb-5">
+            <h2 className="text-h1">
               {mode === "login"    && "Bem-vindo de volta"}
               {mode === "register" && "Criar conta"}
               {mode === "recover"  && "Recuperar acesso"}
             </h2>
-            <p style={{ fontSize: "13px", color: "var(--c-muted)", margin: "4px 0 0" }}>
+            <p className="text-sm-ui mt-1">
               {mode === "login"    && "Acesse o painel de gestão"}
               {mode === "register" && "Preencha os dados abaixo"}
               {mode === "recover"  && "Enviaremos um link por email"}
@@ -135,75 +102,72 @@ export default function Login() {
 
           {/* Alertas */}
           {error && (
-            <div className="anim-in" style={{
-              padding: "10px 14px",
-              background: "#FEE2E2",
-              border: "1.5px solid #FECACA",
-              borderRadius: "10px",
-              color: "#991B1B",
-              fontSize: "13px",
-              marginBottom: 16,
-            }}>
+            <div
+              className="anim-in rounded-xl text-[13px] mb-4"
+              style={{ padding: "10px 14px", background: "var(--c-danger-bg)",
+                border: "1.5px solid #FECACA", color: "#991B1B" }}
+            >
               {error}
             </div>
           )}
           {success && (
-            <div className="anim-in" style={{
-              padding: "10px 14px",
-              background: "#D1FAE5",
-              border: "1.5px solid #A7F3D0",
-              borderRadius: "10px",
-              color: "#065F46",
-              fontSize: "13px",
-              marginBottom: 16,
-            }}>
+            <div
+              className="anim-in rounded-xl text-[13px] mb-4"
+              style={{ padding: "10px 14px", background: "var(--c-success-bg)",
+                border: "1.5px solid #A7F3D0", color: "#065F46" }}
+            >
               {success}
             </div>
           )}
 
           {/* ── Login ─────────────────────────────── */}
           {mode === "login" && (
-            <form onSubmit={handleLogin} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <form onSubmit={handleLogin} className="anim-in-2 flex flex-col gap-3.5">
               <div className="form-group">
                 <label className="input-label">Email</label>
-                <input type="email" value={form.email} onChange={set("email")} placeholder="seu@email.com" required />
+                <input
+                  type="email" value={form.email} onChange={set("email")}
+                  placeholder="seu@email.com" required autoComplete="email"
+                />
               </div>
               <div className="form-group">
                 <label className="input-label">Senha</label>
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                   <input
                     type={showPass ? "text" : "password"}
-                    value={form.password}
-                    onChange={set("password")}
-                    placeholder="••••••••"
-                    required
+                    value={form.password} onChange={set("password")}
+                    placeholder="••••••••" required
+                    autoComplete="current-password"
                     style={{ paddingRight: "44px" }}
                   />
                   <button
-                    type="button"
-                    onClick={() => setShowPass(p => !p)}
-                    style={{
-                      position: "absolute", right: 13, top: "50%", transform: "translateY(-50%)",
-                      background: "none", border: "none", cursor: "pointer",
-                      color: "var(--c-muted)", display: "flex", padding: 0,
-                    }}
+                    type="button" onClick={() => setShowPass(p => !p)}
+                    aria-label={showPass ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex text-muted hover:text-text transition-colors"
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                   >
                     {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
-                {loading ? "Entrando..." : (<>Entrar <ArrowRight size={15} /></>)}
+              <button
+                type="submit"
+                className={`btn-primary w-full justify-center mt-1${loading ? " btn-loading" : ""}`}
+                disabled={loading}
+              >
+                {!loading && (<>Entrar <ArrowRight size={15} /></>)}
               </button>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <div className="flex justify-between mt-1">
                 <button type="button" onClick={() => reset("register")}
-                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-accent)", fontWeight: 600, padding: 0 }}>
+                  className="text-accent text-[12.5px] font-semibold hover:text-accent-deep transition-colors"
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   Criar conta
                 </button>
                 <button type="button" onClick={() => reset("recover")}
-                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", padding: 0 }}>
+                  className="text-muted text-[12.5px] hover:text-text transition-colors"
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   Esqueceu a senha?
                 </button>
               </div>
@@ -212,24 +176,31 @@ export default function Login() {
 
           {/* ── Cadastro ──────────────────────────── */}
           {mode === "register" && (
-            <form onSubmit={handleRegister} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <form onSubmit={handleRegister} className="anim-in-2 flex flex-col gap-3.5">
               <div className="form-group">
                 <label className="input-label">Nome completo</label>
-                <input type="text" value={form.fullName} onChange={set("fullName")} placeholder="Seu nome" required />
+                <input type="text" value={form.fullName} onChange={set("fullName")}
+                  placeholder="Seu nome" required autoComplete="name" />
               </div>
               <div className="form-group">
                 <label className="input-label">Email</label>
-                <input type="email" value={form.email} onChange={set("email")} placeholder="seu@email.com" required />
+                <input type="email" value={form.email} onChange={set("email")}
+                  placeholder="seu@email.com" required autoComplete="email" />
               </div>
               <div className="form-group">
                 <label className="input-label">Senha</label>
-                <input type="password" value={form.password} onChange={set("password")} placeholder="Mínimo 6 caracteres" required minLength={6} />
+                <input type="password" value={form.password} onChange={set("password")}
+                  placeholder="Mínimo 6 caracteres" required minLength={6}
+                  autoComplete="new-password" />
               </div>
-              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
-                {loading ? "Criando conta..." : (<>Criar conta <ArrowRight size={15} /></>)}
+              <button type="submit"
+                className={`btn-primary w-full justify-center mt-1${loading ? " btn-loading" : ""}`}
+                disabled={loading}>
+                {!loading && (<>Criar conta <ArrowRight size={15} /></>)}
               </button>
               <button type="button" onClick={() => reset("login")}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", textAlign: "center", marginTop: 2 }}>
+                className="text-muted text-[12.5px] text-center mt-0.5 hover:text-text transition-colors"
+                style={{ background: "none", border: "none", cursor: "pointer" }}>
                 ← Voltar para o login
               </button>
             </form>
@@ -237,16 +208,20 @@ export default function Login() {
 
           {/* ── Recuperar ─────────────────────────── */}
           {mode === "recover" && (
-            <form onSubmit={handleRecover} className="anim-in-2" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <form onSubmit={handleRecover} className="anim-in-2 flex flex-col gap-3.5">
               <div className="form-group">
                 <label className="input-label">Email cadastrado</label>
-                <input type="email" value={form.email} onChange={set("email")} placeholder="seu@email.com" required />
+                <input type="email" value={form.email} onChange={set("email")}
+                  placeholder="seu@email.com" required autoComplete="email" />
               </div>
-              <button type="submit" className="btn-primary w-full justify-center" style={{ marginTop: 4 }} disabled={loading}>
-                {loading ? "Enviando..." : (<>Enviar link <ArrowRight size={15} /></>)}
+              <button type="submit"
+                className={`btn-primary w-full justify-center mt-1${loading ? " btn-loading" : ""}`}
+                disabled={loading}>
+                {!loading && (<>Enviar link <ArrowRight size={15} /></>)}
               </button>
               <button type="button" onClick={() => reset("login")}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12.5px", color: "var(--c-muted)", textAlign: "center", marginTop: 2 }}>
+                className="text-muted text-[12.5px] text-center mt-0.5 hover:text-text transition-colors"
+                style={{ background: "none", border: "none", cursor: "pointer" }}>
                 ← Voltar para o login
               </button>
             </form>

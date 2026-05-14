@@ -4,7 +4,7 @@ import { db } from "../config/supabase.js";
 import { useToast } from "../components/Toast.jsx";
 import Modal from "../components/Modal.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
-import { Plus, Search, Pencil, Trash2, Package } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Package, AlertTriangle } from "lucide-react";
 
 const EMPTY = { sku: "", description: "", unit_price: "", quantity: "", group_id: "", category_id: "" };
 
@@ -124,42 +124,57 @@ export default function Products() {
 
       {/* Tabela */}
       <div className="card overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["SKU","Descrição","Grupo","Categoria","Preço","Estoque","Ações"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">SKU</th>
+              <th scope="col">Descrição</th>
+              <th scope="col">Grupo</th>
+              <th scope="col">Categoria</th>
+              <th scope="col" className="th-right">Preço</th>
+              <th scope="col">Estoque</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(5)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-16" /></td>
+                  <td><div className="skeleton-text w-40" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                  <td><div className="skeleton-badge" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                </tr>
+              ))
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center">
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Package size={22} color="#0474AF" />
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <Package size={22} color="var(--c-accent)" />
                     </div>
-                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhum produto encontrado</p>
+                    <p className="text-sm-ui">Nenhum produto encontrado</p>
                   </div>
                 </td>
               </tr>
             ) : filtered.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-muted font-mono text-xs">{r.sku}</td>
-                <td className="px-4 py-3 text-text font-medium max-w-48 truncate">{r.description}</td>
-                <td className="px-4 py-3 text-muted text-xs">{r.groups?.name || "—"}</td>
-                <td className="px-4 py-3 text-muted text-xs">{r.categories?.name || "—"}</td>
-                <td className="px-4 py-3 text-accent font-medium">{fmt(r.unit_price)}</td>
-                <td className="px-4 py-3">
-                  <span className={r.quantity <= 5 ? "badge-red" : r.quantity <= 15 ? "badge-orange" : "badge-green"}>
+              <tr key={r.id}>
+                <td className="td-mono">{r.sku}</td>
+                <td className="max-w-48 truncate font-medium">{r.description}</td>
+                <td className="td-muted">{r.groups?.name || "—"}</td>
+                <td className="td-muted">{r.categories?.name || "—"}</td>
+                <td className="td-amount">{fmt(r.unit_price)}</td>
+                <td>
+                  <span className={`${r.quantity <= 5 ? "badge-red" : r.quantity <= 15 ? "badge-orange" : "badge-green"} inline-flex items-center gap-1`}>
+                    {r.quantity <= 5 && <AlertTriangle size={10} />}
                     {r.quantity} un.
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
                     <button aria-label="Editar produto" onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
                     <button aria-label="Excluir produto" onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>
@@ -172,7 +187,7 @@ export default function Products() {
 
       {modal && (
         <Modal title={modal === "new" ? "Novo produto" : "Editar produto"} onClose={() => setModal(null)}>
-          <form onSubmit={save} className="grid grid-cols-2 gap-4">
+          <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="input-label">SKU *</label>
               <input value={form.sku} onChange={set("sku")} required placeholder="EX001" />

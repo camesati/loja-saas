@@ -93,36 +93,46 @@ export default function Customers() {
 
       {/* Tabela */}
       <div className="card overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["Nome","CPF","Email","Profissão","Ações"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">CPF</th>
+              <th scope="col">Email</th>
+              <th scope="col">Profissão</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(4)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-36" /></td>
+                  <td><div className="skeleton-text w-28" /></td>
+                  <td><div className="skeleton-text w-40" /></td>
+                  <td><div className="skeleton-text w-24" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                </tr>
+              ))
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center">
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Users size={22} color="#0474AF" />
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <Users size={22} color="var(--c-accent)" />
                     </div>
-                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhum cliente encontrado</p>
+                    <p className="text-sm-ui">Nenhum cliente encontrado</p>
                   </div>
                 </td>
               </tr>
             ) : filtered.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-text font-medium">{r.name}</td>
-                <td className="px-4 py-3 text-muted">{r.cpf || "—"}</td>
-                <td className="px-4 py-3 text-muted">{r.email || "—"}</td>
-                <td className="px-4 py-3 text-muted">{r.profession || "—"}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+              <tr key={r.id}>
+                <td className="font-medium">{r.name}</td>
+                <td className="td-muted">{r.cpf || "—"}</td>
+                <td className="td-muted">{r.email || "—"}</td>
+                <td className="td-muted">{r.profession || "—"}</td>
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
                     <button aria-label="Editar cliente" onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
                     <button aria-label="Excluir cliente" onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>
@@ -136,7 +146,7 @@ export default function Customers() {
       {/* Modal */}
       {modal && (
         <Modal title={modal === "new" ? "Novo cliente" : "Editar cliente"} onClose={() => setModal(null)}>
-          <form onSubmit={save} className="grid grid-cols-2 gap-4">
+          <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group col-span-2">
               <label className="input-label">Nome *</label>
               <input value={form.name} onChange={set("name")} required />

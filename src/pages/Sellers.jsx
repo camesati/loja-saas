@@ -82,41 +82,53 @@ export default function Sellers() {
       </div>
 
       <div className="card overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["Código","Nome","Status","Ações"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Nome</th>
+              <th scope="col">Status</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(3)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-16" /></td>
+                  <td><div className="skeleton-text w-32" /></td>
+                  <td><div className="skeleton-badge" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                </tr>
+              ))
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-12 text-center">
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <UserCheck size={22} color="#0474AF" />
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <UserCheck size={22} color="var(--c-accent)" />
                     </div>
-                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhum vendedor cadastrado</p>
+                    <p className="text-sm-ui">Nenhum vendedor cadastrado</p>
                   </div>
                 </td>
               </tr>
             ) : rows.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-muted font-mono text-xs">{r.seller_code}</td>
-                <td className="px-4 py-3 text-text font-medium">{r.name}</td>
-                <td className="px-4 py-3">
-                  <button onClick={() => toggleActive(r)}>
-                    <span className={r.active ? "badge-green" : "badge-red"}>
+              <tr key={r.id}>
+                <td className="td-mono">{r.seller_code}</td>
+                <td className="font-medium">{r.name}</td>
+                <td>
+                  <button
+                    onClick={() => toggleActive(r)}
+                    aria-label={r.active ? "Desativar vendedor" : "Ativar vendedor"}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  >
+                    <span className={r.active ? "badge-green" : "badge-red"} style={{ cursor: "pointer", minHeight: 28 }}>
                       {r.active ? "Ativo" : "Inativo"}
                     </span>
                   </button>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
                     <button aria-label="Editar vendedor" onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
                     <button aria-label="Excluir vendedor" onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>

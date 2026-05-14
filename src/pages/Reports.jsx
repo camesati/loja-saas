@@ -126,15 +126,15 @@ export default function Reports() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           ["Total", fmt(total)],
           ["Nº de vendas", sales.length],
           ["Ticket médio", fmt(avgTicket)],
         ].map(([l, v]) => (
           <div key={l} className="card text-center">
-            <p className="text-xs text-muted">{l}</p>
-            <p className="text-2xl font-bold text-text mt-1">{v}</p>
+            <p className="kpi-label">{l}</p>
+            <p className="kpi-value mt-1">{v}</p>
           </div>
         ))}
       </div>
@@ -155,34 +155,31 @@ export default function Reports() {
             />
           </div>
           <div className="card">
-            <h3 className="text-sm font-semibold text-text mb-4">Top produtos</h3>
+            <h3 className="text-h3 mb-4">Top produtos</h3>
             {topProds.length === 0 ? (
-              <p className="text-sm text-muted">—</p>
+              <p className="text-sm-ui">—</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {topProds.map((p, i) => {
                   const maxTotal = topProds[0]?.total || 1;
                   const pct = Math.round((p.total / maxTotal) * 100);
                   return (
                     <div key={p.sku}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontSize: "11px", color: "var(--c-muted)", width: 14 }}>{i + 1}.</span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: "12px", color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0 }}>
-                            {p.description}
-                          </p>
-                          <p style={{ fontSize: "11px", color: "var(--c-muted)", margin: 0 }}>
-                            {p.qty} un. · {fmt(p.total)}
-                          </p>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xs-ui text-muted w-4 shrink-0">{i + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-text truncate m-0">{p.description}</p>
+                          <p className="text-xs text-muted m-0">{p.qty} un. · {fmt(p.total)} ({pct}%)</p>
                         </div>
                       </div>
-                      <div style={{ height: 3, borderRadius: 4, background: "var(--c-border)", marginLeft: 20 }}>
-                        <div style={{
-                          height: "100%", borderRadius: 4,
-                          background: "linear-gradient(90deg, #0474AF, #33B3CB)",
-                          width: `${pct}%`,
-                          transition: "width .4s ease",
-                        }} />
+                      <div className="h-[3px] rounded-full bg-border ml-5">
+                        <div
+                          className="h-full rounded-full transition-all duration-400"
+                          style={{
+                            background: "linear-gradient(90deg, var(--c-accent), var(--c-cyan))",
+                            width: `${pct}%`,
+                          }}
+                        />
                       </div>
                     </div>
                   );
@@ -198,60 +195,83 @@ export default function Reports() {
         <div className="px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold text-text">Vendas do período</h3>
         </div>
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["#","Data","Cliente","Vendedor","Pagamento","Total",""].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Data</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Vendedor</th>
+              <th scope="col">Pagamento</th>
+              <th scope="col" className="th-right">Total</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(4)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-12" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                  <td><div className="skeleton-text w-28" /></td>
+                  <td><div className="skeleton-text w-20" /></td>
+                  <td><div className="skeleton-text w-16" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                  <td></td>
+                </tr>
+              ))
             ) : sales.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center">
-                  <FileText size={28} className="mx-auto mb-2 text-muted opacity-40" />
-                  <p className="text-muted text-sm">Nenhuma venda no período</p>
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <FileText size={22} color="var(--c-accent)" />
+                    </div>
+                    <p className="text-sm-ui">Nenhuma venda no período</p>
+                  </div>
                 </td>
               </tr>
             ) : sales.map(r => (
               <>
-                <tr key={r.id} className="table-row-hover border-b border-border">
-                  <td className="px-4 py-3 text-muted text-xs">#{r.sale_number}</td>
-                  <td className="px-4 py-3 text-muted text-xs">{fmtDate(r.created_at)}</td>
-                  <td className="px-4 py-3 text-text">{r.customers?.name || "—"}</td>
-                  <td className="px-4 py-3 text-muted text-xs">{r.sellers?.name || "—"}</td>
-                  <td className="px-4 py-3 text-muted text-xs">{r.payment_methods?.name || "—"}</td>
-                  <td className="px-4 py-3 text-accent font-semibold">{fmt(r.total_amount)}</td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => toggleExpand(r.id)} className="text-muted hover:text-text">
+                <tr key={r.id}>
+                  <td className="td-mono">#{r.sale_number}</td>
+                  <td className="td-muted">{fmtDate(r.created_at)}</td>
+                  <td>{r.customers?.name || "—"}</td>
+                  <td className="td-muted">{r.sellers?.name || "—"}</td>
+                  <td className="td-muted">{r.payment_methods?.name || "—"}</td>
+                  <td className="td-amount">{fmt(r.total_amount)}</td>
+                  <td className="td-actions">
+                    <button
+                      onClick={() => toggleExpand(r.id)}
+                      aria-label={expanded[r.id] ? "Recolher itens" : "Expandir itens"}
+                      className="text-muted hover:text-text transition-colors"
+                      style={{ background: "none", border: "none", cursor: "pointer" }}
+                    >
                       {expanded[r.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
                   </td>
                 </tr>
                 {expanded[r.id] && (
-                  <tr key={`${r.id}-items`} className="bg-[#F6FAFE]">
+                  <tr key={`${r.id}-items`} style={{ background: "var(--c-bg)" }}>
                     <td colSpan={7} className="px-8 py-3">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-muted">
-                            <th className="text-left pb-1">SKU</th>
-                            <th className="text-left pb-1">Produto</th>
-                            <th className="text-right pb-1">Qtd</th>
-                            <th className="text-right pb-1">Unit.</th>
-                            <th className="text-right pb-1">Total</th>
+                            <th className="text-left pb-1" scope="col">SKU</th>
+                            <th className="text-left pb-1" scope="col">Produto</th>
+                            <th className="text-right pb-1" scope="col">Qtd</th>
+                            <th className="text-right pb-1" scope="col">Unit.</th>
+                            <th className="text-right pb-1" scope="col">Total</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {(r.sale_items || []).map((i, idx) => (
+                          {(r.sale_items || []).map((item, idx) => (
                             <tr key={idx}>
-                              <td className="text-muted py-0.5">{i.sku}</td>
-                              <td className="text-text py-0.5">{i.description}</td>
-                              <td className="text-right text-muted py-0.5">{i.quantity}</td>
-                              <td className="text-right text-muted py-0.5">{fmt(i.unit_price)}</td>
-                              <td className="text-right text-accent py-0.5">{fmt(i.total_price)}</td>
+                              <td className="text-muted py-0.5">{item.sku}</td>
+                              <td className="text-text py-0.5">{item.description}</td>
+                              <td className="text-right text-muted py-0.5">{item.quantity}</td>
+                              <td className="text-right text-muted py-0.5">{fmt(item.unit_price)}</td>
+                              <td className="text-right py-0.5 font-semibold" style={{ color: "var(--c-accent)" }}>{fmt(item.total_price)}</td>
                             </tr>
                           ))}
                         </tbody>

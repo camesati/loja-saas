@@ -1,88 +1,72 @@
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+const MAX_WIDTHS = { sm: "380px", md: "540px", lg: "720px", xl: "900px" };
 
 export default function Modal({ title, onClose, children, footer, size = "md" }) {
+  const containerRef = useRef(null);
+  const titleId = `modal-title-${Math.random().toString(36).slice(2, 7)}`;
+
   useEffect(() => {
     const h = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", h);
-    return () => document.removeEventListener("keydown", h);
+
+    // Focus trap
+    const focusable = containerRef.current?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable?.length) focusable[0].focus();
+
+    const trapFocus = (e) => {
+      if (!containerRef.current || e.key !== "Tab") return;
+      const els = [...(containerRef.current.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ))];
+      if (!els.length) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", trapFocus);
+
+    return () => {
+      document.removeEventListener("keydown", h);
+      document.removeEventListener("keydown", trapFocus);
+    };
   }, [onClose]);
 
-  const maxW = { sm: "380px", md: "540px", lg: "720px", xl: "900px" }[size] || "540px";
-
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 50,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 16,
-      background: "rgba(42,63,82,0.18)",
-      backdropFilter: "blur(4px)",
-    }}>
-      <div className="anim-in" style={{
-        background: "#fff",
-        border: "1.5px solid var(--c-border)",
-        borderRadius: "20px",
-        width: "100%",
-        maxWidth: maxW,
-        maxHeight: "90vh",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 12px 48px rgba(42,63,82,0.14), 0 2px 8px rgba(42,63,82,0.06)",
-        overflow: "hidden",
-      }}>
+    <div className="modal-overlay">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="modal-container anim-modal-in"
+        style={{ maxWidth: MAX_WIDTHS[size] || "540px" }}
+      >
         {/* Header */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "18px 24px",
-          borderBottom: "1.5px solid var(--c-border)",
-          flexShrink: 0,
-        }}>
-          <h3 style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "15px",
-            fontWeight: 700,
-            color: "var(--c-text)",
-            margin: 0,
-          }}>
-            {title}
-          </h3>
-          <button
-            onClick={onClose}
-            aria-label="Fechar"
-            style={{
-              width: 28, height: 28,
-              borderRadius: "8px",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "#F5F8FC",
-              border: "1.5px solid var(--c-border)",
-              cursor: "pointer",
-              color: "var(--c-muted)",
-              transition: "all .15s",
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#E2EAF2"; e.currentTarget.style.color = "var(--c-text)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "#F5F8FC"; e.currentTarget.style.color = "var(--c-muted)"; }}
-          >
+        <div className="modal-header">
+          <h3 id={titleId} className="modal-title">{title}</h3>
+          <button onClick={onClose} aria-label="Fechar" className="modal-close">
             <X size={14} />
           </button>
         </div>
 
         {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
+        <div className="modal-body">
           {children}
         </div>
 
-        {/* Footer — slot opcional para botões de ação */}
+        {/* Footer */}
         {footer && (
-          <div style={{
-            padding: "14px 24px",
-            borderTop: "1.5px solid var(--c-border)",
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 8,
-            flexShrink: 0,
-            background: "#FAFCFE",
-          }}>
+          <div className="modal-footer">
             {footer}
           </div>
         )}

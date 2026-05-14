@@ -19,13 +19,17 @@ export default function Settings() {
       <h2 className="text-lg font-semibold text-text">Configurações</h2>
 
       {/* Tabs */}
-      <div className="flex border-b border-border">
+      <div className="flex border-b border-border" role="tablist" aria-label="Configurações">
         {[["profile","Perfil"],["groups","Grupos"],["categories","Categorias"]].map(([k, l]) => (
           <button
             key={k}
+            role="tab"
+            aria-selected={tab === k}
+            aria-controls={`panel-${k}`}
+            id={`tab-${k}`}
             onClick={() => setTab(k)}
             className={`pb-3 px-4 text-sm border-b-2 transition-colors ${
-              tab === k ? "border-accent text-accent" : "border-transparent text-muted hover:text-text"
+              tab === k ? "border-accent text-accent font-semibold" : "border-transparent text-muted hover:text-text"
             }`}
           >
             {l}
@@ -33,9 +37,15 @@ export default function Settings() {
         ))}
       </div>
 
-      {tab === "profile" && <ProfileTab uid={uid} token={token} toast={toast} />}
-      {tab === "groups" && <GroupsTab uid={uid} token={token} toast={toast} />}
-      {tab === "categories" && <CategoriesTab uid={uid} token={token} toast={toast} />}
+      <div id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden={tab !== "profile"}>
+        {tab === "profile" && <ProfileTab uid={uid} token={token} toast={toast} />}
+      </div>
+      <div id="panel-groups" role="tabpanel" aria-labelledby="tab-groups" hidden={tab !== "groups"}>
+        {tab === "groups" && <GroupsTab uid={uid} token={token} toast={toast} />}
+      </div>
+      <div id="panel-categories" role="tabpanel" aria-labelledby="tab-categories" hidden={tab !== "categories"}>
+        {tab === "categories" && <CategoriesTab uid={uid} token={token} toast={toast} />}
+      </div>
     </div>
   );
 }
@@ -128,19 +138,21 @@ function GroupsTab({ uid, token, toast }) {
         </button>
       </div>
       <div className="card overflow-x-auto p-0 max-w-lg">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left text-xs text-muted font-medium px-4 py-3">Nome</th>
-              <th className="text-left text-xs text-muted font-medium px-4 py-3">Ações</th>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-text">{r.name}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+            {rows.length === 0 ? (
+              <tr><td colSpan={2} className="py-8 text-center text-sm-ui">Nenhum grupo cadastrado</td></tr>
+            ) : rows.map(r => (
+              <tr key={r.id}>
+                <td>{r.name}</td>
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
                     <button onClick={() => { setName(r.name); setModal(r); }} className="btn-secondary btn-sm"><Pencil size={12} /></button>
                     <button onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>
@@ -233,21 +245,23 @@ function CategoriesTab({ uid, token, toast }) {
         </button>
       </div>
       <div className="card overflow-x-auto p-0 max-w-lg">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["Nome","Grupo","Ações"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Grupo</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-text">{r.name}</td>
-                <td className="px-4 py-3 text-muted text-xs">{r.groups?.name || "—"}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+            {rows.length === 0 ? (
+              <tr><td colSpan={3} className="py-8 text-center text-sm-ui">Nenhuma categoria cadastrada</td></tr>
+            ) : rows.map(r => (
+              <tr key={r.id}>
+                <td>{r.name}</td>
+                <td className="td-muted">{r.groups?.name || "—"}</td>
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
                     <button onClick={() => { setForm({ name: r.name, group_id: r.group_id || "" }); setModal(r); }} className="btn-secondary btn-sm"><Pencil size={12} /></button>
                     <button onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>

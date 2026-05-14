@@ -83,41 +83,55 @@ export default function PaymentMethods() {
       </div>
 
       <div className="card overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-border">
-              {["Nome","Tipo","Status","Ações"].map(h => (
-                <th key={h} className="text-left text-xs text-muted font-medium px-4 py-3">{h}</th>
-              ))}
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Status</th>
+              <th scope="col" className="th-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="py-12 text-center text-muted text-sm">Carregando...</td></tr>
+              [...Array(3)].map((_, i) => (
+                <tr key={i} className="skeleton-row">
+                  <td><div className="skeleton-text w-28" /></td>
+                  <td><div className="skeleton-badge" /></td>
+                  <td><div className="skeleton-badge" /></td>
+                  <td><div className="skeleton-text w-16 ml-auto" /></td>
+                </tr>
+              ))
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-12 text-center">
-                  <CreditCard size={28} className="mx-auto mb-2 text-muted opacity-40" />
-                  <p className="text-muted text-sm">Nenhuma forma cadastrada</p>
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="kpi-icon-wrap kpi-card--blue">
+                      <CreditCard size={22} color="var(--c-accent)" />
+                    </div>
+                    <p className="text-sm-ui">Nenhuma forma cadastrada</p>
+                  </div>
                 </td>
               </tr>
             ) : rows.map(r => (
-              <tr key={r.id} className="table-row-hover border-b border-border last:border-0">
-                <td className="px-4 py-3 text-text font-medium">{r.name}</td>
-                <td className="px-4 py-3">
-                  <span className="badge-blue">{TYPES[r.type] || r.type}</span>
-                </td>
-                <td className="px-4 py-3">
-                  <button onClick={() => toggleActive(r)}>
-                    <span className={r.active ? "badge-green" : "badge-red"}>
+              <tr key={r.id}>
+                <td className="font-medium">{r.name}</td>
+                <td><span className="badge-blue">{TYPES[r.type] || r.type}</span></td>
+                <td>
+                  <button
+                    onClick={() => toggleActive(r)}
+                    aria-label={r.active ? "Desativar" : "Ativar"}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  >
+                    <span className={r.active ? "badge-green" : "badge-red"} style={{ cursor: "pointer" }}>
                       {r.active ? "Ativo" : "Inativo"}
                     </span>
                   </button>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
-                    <button onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
+                <td className="td-actions">
+                  <div className="flex gap-2 justify-end">
+                    <button aria-label="Editar" onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
+                    <button aria-label="Excluir" onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>
                 </td>
               </tr>

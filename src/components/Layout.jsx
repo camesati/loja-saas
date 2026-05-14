@@ -38,20 +38,20 @@ const ALL_NAV = NAV_GROUPS.flatMap(g => g.items);
 export default function Layout({ page, setPage, children }) {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [hoveredKey, setHoveredKey] = useState(null);
 
   const email = user?.email || "";
   const initials = email.slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--c-bg)" }}>
+    <div className="flex h-screen overflow-hidden bg-bg">
 
       {/* Overlay mobile */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
           className="fixed inset-0 z-20 md:hidden"
-          style={{ background: "rgba(42,63,82,0.20)", backdropFilter: "blur(2px)" }}
+          style={{ background: "var(--c-overlay)", backdropFilter: "blur(2px)" }}
+          aria-hidden="true"
         />
       )}
 
@@ -59,114 +59,64 @@ export default function Layout({ page, setPage, children }) {
       <aside
         className={`
           fixed md:static inset-y-0 left-0 z-30
-          w-[220px] shrink-0 flex flex-col
+          w-56 shrink-0 flex flex-col
+          bg-card border-r border-border
           transition-transform duration-200 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
-        style={{
-          background: "#FFFFFF",
-          borderRight: "1.5px solid var(--c-border)",
-          boxShadow: "2px 0 16px rgba(26,46,61,0.05)",
-        }}
+        style={{ boxShadow: "2px 0 16px rgba(26,46,61,0.05)" }}
       >
         {/* Logo */}
-        <div style={{
-          padding: "20px 18px 16px",
-          borderBottom: "1.5px solid var(--c-border)",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}>
-          <div style={{
-            width: 34, height: 34,
-            borderRadius: "10px",
-            background: "linear-gradient(135deg, #0474AF 0%, #045C84 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <span style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "20px",
-              fontWeight: 700,
-              color: "#FFFFFF",
-              lineHeight: 1,
-            }}>C</span>
+        <div className="flex items-center gap-2.5 px-[18px] py-5 border-b border-border shrink-0">
+          <div className="w-[34px] h-[34px] rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--c-accent) 0%, var(--c-accent-deep) 100%)" }}>
+            <span className="font-display text-xl font-bold text-white leading-none">C</span>
           </div>
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "var(--c-accent-deep)",
-              letterSpacing: ".02em",
-              lineHeight: 1.15,
-            }}>Camesa</div>
-            <div style={{
-              fontSize: "9.5px",
-              color: "var(--c-muted)",
-              letterSpacing: ".10em",
-              textTransform: "uppercase",
-              fontWeight: 700,
-              marginTop: "1px",
-            }}>Gestão</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-display text-base font-bold tracking-wide leading-tight"
+              style={{ color: "var(--c-accent-deep)" }}>Camesa</div>
+            <div className="text-label mt-px" style={{ opacity: 0.8 }}>Gestão</div>
           </div>
 
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden"
-            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-muted)", padding: 4, display: "flex" }}
+            className="md:hidden flex items-center justify-center p-1 text-muted hover:text-text transition-colors"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+            aria-label="Fechar menu"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Nav com grupos */}
-        <nav style={{ flex: 1, padding: "8px 10px", overflowY: "auto" }}>
+        <nav
+          role="navigation"
+          aria-label="Menu principal"
+          className="flex-1 px-2.5 py-2 overflow-y-auto"
+        >
           {NAV_GROUPS.map(({ label: groupLabel, items }) => (
-            <div key={groupLabel} style={{ marginBottom: 4 }}>
-              <div style={{
-                padding: "10px 10px 4px",
-                fontSize: "10px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: ".08em",
-                color: "var(--c-muted)",
-                opacity: 0.7,
-              }}>
+            <div key={groupLabel} className="mb-1">
+              <div className="text-label px-2.5 pt-2.5 pb-1" style={{ opacity: 0.7 }}>
                 {groupLabel}
               </div>
               {items.map(({ key, label, icon: Icon }) => {
                 const active = page === key;
-                const hovered = hoveredKey === key && !active;
                 return (
                   <button
                     key={key}
                     onClick={() => { setPage(key); setSidebarOpen(false); }}
-                    onMouseEnter={() => setHoveredKey(key)}
-                    onMouseLeave={() => setHoveredKey(null)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "9px",
-                      width: "100%",
-                      padding: "8px 10px",
-                      paddingLeft: active ? "9px" : "12px",
-                      margin: "1px 0",
-                      borderRadius: "9px",
-                      fontSize: "13px",
-                      fontFamily: "var(--font-sans)",
-                      fontWeight: active ? 700 : 500,
-                      color: active ? "var(--c-accent)" : hovered ? "var(--c-text)" : "var(--c-muted)",
-                      background: active ? "#EEF6FB" : hovered ? "#F4F8FC" : "transparent",
-                      border: "none",
-                      borderLeft: active ? "3px solid var(--c-magenta)" : "3px solid transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "all .12s",
-                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={`
+                      flex items-center gap-2 w-full my-px rounded-[9px]
+                      text-[13px] font-sans transition-all duration-100 text-left
+                      ${active
+                        ? "bg-[#EEF6FB] text-accent font-bold border-l-[3px] border-magenta pl-[9px] pr-2.5 py-2"
+                        : "text-muted font-medium hover:bg-[#F4F8FC] hover:text-text border-l-[3px] border-transparent pl-3 pr-2.5 py-2"
+                      }
+                    `}
                   >
-                    <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
+                    <Icon size={15} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
                     <span>{label}</span>
                   </button>
                 );
@@ -176,26 +126,15 @@ export default function Layout({ page, setPage, children }) {
         </nav>
 
         {/* Usuário */}
-        <div style={{ borderTop: "1.5px solid var(--c-border)", padding: "14px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
-            <div style={{
-              width: 30, height: 30,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #0474AF, #045C84)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "11px", fontWeight: 700, color: "#fff",
-              flexShrink: 0,
-            }}>
+        <div className="border-t border-border px-3.5 py-3.5 shrink-0">
+          <div className="flex items-center gap-2 mb-2.5">
+            <div
+              className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+              style={{ background: "linear-gradient(135deg, var(--c-accent), var(--c-accent-deep))" }}
+            >
               {initials}
             </div>
-            <span style={{
-              fontSize: "12px", fontWeight: 600,
-              color: "var(--c-text)",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              flex: 1,
-            }}>
-              {email}
-            </span>
+            <span className="text-xs font-semibold text-text truncate flex-1">{email}</span>
           </div>
           <button onClick={logout} className="btn-secondary btn-sm w-full justify-center">
             <LogOut size={13} />
@@ -208,27 +147,21 @@ export default function Layout({ page, setPage, children }) {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Topbar mobile */}
-        <header
-          className="md:hidden flex items-center gap-3"
-          style={{
-            padding: "12px 16px",
-            background: "#fff",
-            borderBottom: "1.5px solid var(--c-border)",
-            flexShrink: 0,
-          }}
-        >
+        <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-card border-b border-border shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-muted)", padding: 4, display: "flex" }}
+            className="flex items-center justify-center p-1 text-muted hover:text-text transition-colors"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+            aria-label="Abrir menu"
           >
             <Menu size={20} />
           </button>
-          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "15px", color: "var(--c-text)" }}>
+          <span className="font-sans font-bold text-[15px] text-text">
             {ALL_NAV.find(n => n.key === page)?.label || "Dashboard"}
           </span>
         </header>
 
-        <main style={{ flex: 1, overflowY: "auto", padding: "22px 26px" }}>
+        <main className="flex-1 overflow-y-auto" style={{ padding: "22px 26px" }}>
           {children}
         </main>
       </div>
