@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect } from "react";
 
-export default function Modal({ title, onClose, children, size = "md" }) {
+export default function Modal({ title, onClose, children, footer, size = "md" }) {
   useEffect(() => {
     const h = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", h);
@@ -48,6 +48,7 @@ export default function Modal({ title, onClose, children, size = "md" }) {
           </h3>
           <button
             onClick={onClose}
+            aria-label="Fechar"
             style={{
               width: 28, height: 28,
               borderRadius: "8px",
@@ -70,6 +71,21 @@ export default function Modal({ title, onClose, children, size = "md" }) {
         <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
           {children}
         </div>
+
+        {/* Footer — slot opcional para botões de ação */}
+        {footer && (
+          <div style={{
+            padding: "14px 24px",
+            borderTop: "1.5px solid var(--c-border)",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 8,
+            flexShrink: 0,
+            background: "#FAFCFE",
+          }}>
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

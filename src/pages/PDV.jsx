@@ -122,13 +122,21 @@ export default function PDV() {
 
   if (done) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-5">
-        <div className="w-16 h-16 rounded-full bg-green-900/40 flex items-center justify-center">
-          <CheckCircle size={36} className="text-green-400" />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 20 }}>
+        <div style={{
+          width: 64, height: 64,
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #D0F0F6, #EEF6FB)",
+          border: "2px solid #33B3CB",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <CheckCircle size={32} color="#0474AF" />
         </div>
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-text">Venda finalizada!</h2>
-          <p className="text-muted mt-1">Venda #{done.saleNumber} — {fmt(done.total)}</p>
+        <div style={{ textAlign: "center" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--c-text)", margin: 0 }}>Venda finalizada!</h2>
+          <p style={{ color: "var(--c-muted)", marginTop: 4, fontSize: "14px" }}>
+            Venda #{done.saleNumber} — <strong style={{ color: "var(--c-accent)" }}>{fmt(done.total)}</strong>
+          </p>
         </div>
         <button className="btn-primary" onClick={() => setDone(null)}>
           <ShoppingCart size={16} />
@@ -264,11 +272,11 @@ export default function PDV() {
               <span className="text-xl font-bold text-accent">{fmt(total)}</span>
             </div>
             <button
-              className="btn-primary w-full justify-center mt-4"
+              className={`btn-primary w-full justify-center mt-4${loading ? " btn-loading" : ""}`}
               onClick={finalize}
               disabled={loading || cart.length === 0}
             >
-              {loading ? "Finalizando..." : "Finalizar venda"}
+              {loading ? "" : "Finalizar venda"}
             </button>
           </div>
         </div>

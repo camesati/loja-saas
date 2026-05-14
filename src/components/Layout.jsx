@@ -6,17 +6,34 @@ import {
   LogOut, Menu, X,
 } from "lucide-react";
 
-const NAV = [
-  { key: "dashboard", label: "Dashboard",     icon: LayoutDashboard },
-  { key: "pdv",       label: "PDV",           icon: ShoppingCart },
-  { key: "products",  label: "Produtos",      icon: Package },
-  { key: "stock",     label: "Estoque",       icon: Layers },
-  { key: "customers", label: "Clientes",      icon: Users },
-  { key: "sellers",   label: "Vendedores",    icon: UserCheck },
-  { key: "payments",  label: "Pagamentos",    icon: CreditCard },
-  { key: "reports",   label: "Relatórios",    icon: BarChart2 },
-  { key: "settings",  label: "Configurações", icon: Settings },
+const NAV_GROUPS = [
+  {
+    label: "Vendas",
+    items: [
+      { key: "dashboard", label: "Dashboard",  icon: LayoutDashboard },
+      { key: "pdv",       label: "PDV",        icon: ShoppingCart },
+      { key: "reports",   label: "Relatórios", icon: BarChart2 },
+    ],
+  },
+  {
+    label: "Cadastros",
+    items: [
+      { key: "products",  label: "Produtos",    icon: Package },
+      { key: "stock",     label: "Estoque",     icon: Layers },
+      { key: "customers", label: "Clientes",    icon: Users },
+      { key: "sellers",   label: "Vendedores",  icon: UserCheck },
+      { key: "payments",  label: "Pagamentos",  icon: CreditCard },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      { key: "settings", label: "Configurações", icon: Settings },
+    ],
+  },
 ];
+
+const ALL_NAV = NAV_GROUPS.flatMap(g => g.items);
 
 export default function Layout({ page, setPage, children }) {
   const { user, logout } = useAuth();
@@ -38,10 +55,7 @@ export default function Layout({ page, setPage, children }) {
         />
       )}
 
-      {/* ── Sidebar ─────────────────────────────────────────────────────
-          Mobile: fixed, desliza com transform
-          Desktop (md+): static, parte do flex — sem md:ml necessário no main
-      ─────────────────────────────────────────────────────────────── */}
+      {/* ── Sidebar ─────────────────────────────────────── */}
       <aside
         className={`
           fixed md:static inset-y-0 left-0 z-30
@@ -66,29 +80,25 @@ export default function Layout({ page, setPage, children }) {
           <div style={{
             width: 34, height: 34,
             borderRadius: "10px",
-            background: "linear-gradient(135deg, #EBF4FC 0%, #D0E6F7 100%)",
-            border: "1.5px solid #BDD4EA",
+            background: "linear-gradient(135deg, #0474AF 0%, #045C84 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}>
             <span style={{
               fontFamily: "var(--font-display)",
               fontSize: "20px",
-              fontStyle: "italic",
-              fontWeight: 400,
-              color: "#4A8FC1",
+              fontWeight: 700,
+              color: "#FFFFFF",
               lineHeight: 1,
-              paddingBottom: "1px",
             }}>C</span>
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: "17px",
-              fontWeight: 500,
-              color: "#1A2E3D",
+              fontSize: "16px",
+              fontWeight: 700,
+              color: "var(--c-accent-deep)",
               letterSpacing: ".02em",
               lineHeight: 1.15,
             }}>Camesa</div>
@@ -111,51 +121,58 @@ export default function Layout({ page, setPage, children }) {
           </button>
         </div>
 
-        {/* Nav */}
+        {/* Nav com grupos */}
         <nav style={{ flex: 1, padding: "8px 10px", overflowY: "auto" }}>
-          {NAV.map(({ key, label, icon: Icon }) => {
-            const active = page === key;
-            const hovered = hoveredKey === key && !active;
-            return (
-              <button
-                key={key}
-                onClick={() => { setPage(key); setSidebarOpen(false); }}
-                onMouseEnter={() => setHoveredKey(key)}
-                onMouseLeave={() => setHoveredKey(null)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "9px",
-                  width: "100%",
-                  padding: "8px 12px",
-                  margin: "1px 0",
-                  borderRadius: "9px",
-                  fontSize: "13px",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: active ? 700 : 500,
-                  color: active ? "#4A8FC1" : hovered ? "#1A2E3D" : "#4E6A7E",
-                  background: active ? "#EBF4FC" : hovered ? "#F4F8FC" : "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all .12s",
-                }}
-              >
-                <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
-                <span>{label}</span>
-                {active && (
-                  <span style={{
-                    marginLeft: "auto",
-                    width: 6, height: 6,
-                    borderRadius: "50%",
-                    background: "#4A8FC1",
-                    display: "inline-block",
-                    flexShrink: 0,
-                  }} />
-                )}
-              </button>
-            );
-          })}
+          {NAV_GROUPS.map(({ label: groupLabel, items }) => (
+            <div key={groupLabel} style={{ marginBottom: 4 }}>
+              <div style={{
+                padding: "10px 10px 4px",
+                fontSize: "10px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: ".08em",
+                color: "var(--c-muted)",
+                opacity: 0.7,
+              }}>
+                {groupLabel}
+              </div>
+              {items.map(({ key, label, icon: Icon }) => {
+                const active = page === key;
+                const hovered = hoveredKey === key && !active;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => { setPage(key); setSidebarOpen(false); }}
+                    onMouseEnter={() => setHoveredKey(key)}
+                    onMouseLeave={() => setHoveredKey(null)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "9px",
+                      width: "100%",
+                      padding: "8px 10px",
+                      paddingLeft: active ? "9px" : "12px",
+                      margin: "1px 0",
+                      borderRadius: "9px",
+                      fontSize: "13px",
+                      fontFamily: "var(--font-sans)",
+                      fontWeight: active ? 700 : 500,
+                      color: active ? "var(--c-accent)" : hovered ? "var(--c-text)" : "var(--c-muted)",
+                      background: active ? "#EEF6FB" : hovered ? "#F4F8FC" : "transparent",
+                      border: "none",
+                      borderLeft: active ? "3px solid var(--c-magenta)" : "3px solid transparent",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all .12s",
+                    }}
+                  >
+                    <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Usuário */}
@@ -164,7 +181,7 @@ export default function Layout({ page, setPage, children }) {
             <div style={{
               width: 30, height: 30,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #BDD4EA, #4A8FC1)",
+              background: "linear-gradient(135deg, #0474AF, #045C84)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "11px", fontWeight: 700, color: "#fff",
               flexShrink: 0,
@@ -206,8 +223,8 @@ export default function Layout({ page, setPage, children }) {
           >
             <Menu size={20} />
           </button>
-          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "14px", color: "var(--c-text)" }}>
-            {NAV.find(n => n.key === page)?.label || "Dashboard"}
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "15px", color: "var(--c-text)" }}>
+            {ALL_NAV.find(n => n.key === page)?.label || "Dashboard"}
           </span>
         </header>
 

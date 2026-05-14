@@ -2,20 +2,35 @@ import { AlertTriangle } from "lucide-react";
 
 export default function ConfirmDialog({ message, onConfirm, onCancel, loading }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-      <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center shrink-0">
-            <AlertTriangle size={20} className="text-red-400" />
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 50,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16,
+      background: "rgba(42,63,82,0.18)",
+      backdropFilter: "blur(4px)",
+    }}>
+      <div className="card anim-in" style={{ width: "100%", maxWidth: 360, padding: 24 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 20 }}>
+          <div style={{
+            width: 40, height: 40,
+            borderRadius: "50%",
+            background: "#FEE2E2",
+            border: "1px solid #FECACA",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <AlertTriangle size={18} color="#DC2626" />
           </div>
-          <p className="text-text text-sm">{message}</p>
+          <p style={{ color: "var(--c-text)", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
+            {message}
+          </p>
         </div>
-        <div className="flex gap-2 justify-end">
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <button className="btn-secondary btn-sm" onClick={onCancel} disabled={loading}>
             Cancelar
           </button>
-          <button className="btn-danger btn-sm" onClick={onConfirm} disabled={loading}>
-            {loading ? "Excluindo..." : "Excluir"}
+          <button className={`btn-danger btn-sm${loading ? " btn-loading" : ""}`} onClick={onConfirm} disabled={loading}>
+            {loading ? "" : "Excluir"}
           </button>
         </div>
       </div>

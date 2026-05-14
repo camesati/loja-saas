@@ -99,8 +99,12 @@ export default function StockEntries() {
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center">
-                  <Layers size={28} className="mx-auto mb-2 text-muted opacity-40" />
-                  <p className="text-muted text-sm">Nenhuma entrada registrada</p>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Layers size={22} color="#0474AF" />
+                    </div>
+                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhuma entrada registrada</p>
+                  </div>
                 </td>
               </tr>
             ) : filtered.map(r => (
@@ -154,7 +158,7 @@ export default function StockEntries() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" className="btn-secondary" onClick={() => { setModal(false); setForm(EMPTY); }}>Cancelar</button>
-              <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Salvando..." : "Registrar entrada"}</button>
+              <button type="submit" className={`btn-primary${saving ? " btn-loading" : ""}`} disabled={saving}>{saving ? "" : "Registrar entrada"}</button>
             </div>
           </form>
         </Modal>

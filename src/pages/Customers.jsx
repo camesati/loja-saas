@@ -107,8 +107,12 @@ export default function Customers() {
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center">
-                  <Users size={28} className="mx-auto mb-2 text-muted opacity-40" />
-                  <p className="text-muted text-sm">Nenhum cliente encontrado</p>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EEF6FB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Users size={22} color="#0474AF" />
+                    </div>
+                    <p style={{ color: "var(--c-muted)", fontSize: "13px", margin: 0 }}>Nenhum cliente encontrado</p>
+                  </div>
                 </td>
               </tr>
             ) : filtered.map(r => (
@@ -119,8 +123,8 @@ export default function Customers() {
                 <td className="px-4 py-3 text-muted">{r.profession || "—"}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
-                    <button onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
+                    <button aria-label="Editar cliente" onClick={() => openEdit(r)} className="btn-secondary btn-sm"><Pencil size={12} /></button>
+                    <button aria-label="Excluir cliente" onClick={() => setDeleting(r)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                   </div>
                 </td>
               </tr>
@@ -155,7 +159,7 @@ export default function Customers() {
             </div>
             <div className="col-span-2 flex justify-end gap-2 pt-2">
               <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Salvando..." : "Salvar"}</button>
+              <button type="submit" className={`btn-primary${saving ? " btn-loading" : ""}`} disabled={saving}>{saving ? "" : "Salvar"}</button>
             </div>
           </form>
         </Modal>

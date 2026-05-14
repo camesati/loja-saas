@@ -159,16 +159,34 @@ export default function Reports() {
             {topProds.length === 0 ? (
               <p className="text-sm text-muted">—</p>
             ) : (
-              <div className="space-y-2">
-                {topProds.map((p, i) => (
-                  <div key={p.sku} className="flex items-center gap-2">
-                    <span className="text-xs text-muted w-4">{i + 1}.</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-text truncate">{p.description}</p>
-                      <p className="text-xs text-muted">{p.qty} un. · {fmt(p.total)}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {topProds.map((p, i) => {
+                  const maxTotal = topProds[0]?.total || 1;
+                  const pct = Math.round((p.total / maxTotal) * 100);
+                  return (
+                    <div key={p.sku}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                        <span style={{ fontSize: "11px", color: "var(--c-muted)", width: 14 }}>{i + 1}.</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: "12px", color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0 }}>
+                            {p.description}
+                          </p>
+                          <p style={{ fontSize: "11px", color: "var(--c-muted)", margin: 0 }}>
+                            {p.qty} un. · {fmt(p.total)}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ height: 3, borderRadius: 4, background: "var(--c-border)", marginLeft: 20 }}>
+                        <div style={{
+                          height: "100%", borderRadius: 4,
+                          background: "linear-gradient(90deg, #0474AF, #33B3CB)",
+                          width: `${pct}%`,
+                          transition: "width .4s ease",
+                        }} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
