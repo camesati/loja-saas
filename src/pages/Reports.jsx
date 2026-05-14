@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { db } from "../config/supabase.js";
 import ArrowBarChart from "../components/ArrowBarChart.jsx";
+import DonutChart from "../components/DonutChart.jsx";
 import { Search, ChevronDown, ChevronUp, FileText } from "lucide-react";
+
+const DONUT_COLORS = { "Crédito": "#3b82f6", "Débito": "#22c55e", "PIX": "#f59e0b", "Dinheiro": "#f97316" };
 
 const fmt = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 const fmtDate = (d) => new Date(d).toLocaleDateString("pt-BR");
@@ -64,18 +67,28 @@ export default function Reports() {
   const total = sales.reduce((s, r) => s + Number(r.total_amount), 0);
   const avgTicket = sales.length ? total / sales.length : 0;
 
-  // Chart por dia
-  const dayMap = {};
+  // Chart por dia com segmentos por forma de pagamento
+  const allPayTypes = [...new Set(sales.map(s => s.payment_methods?.name || "Outros"))].sort();
+  const dayTypeMap = {};
   sales.forEach(s => {
     const day = s.created_at.split("T")[0];
-    dayMap[day] = (dayMap[day] || 0) + Number(s.total_amount);
+    const t   = s.payment_methods?.name || "Outros";
+    if (!dayTypeMap[day]) dayTypeMap[day] = {};
+    dayTypeMap[day][t] = (dayTypeMap[day][t] || 0) + Number(s.total_amount);
   });
-  const chartData = Object.entries(dayMap)
+  const chartData = Object.entries(dayTypeMap)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([d, v]) => ({
-      dia: new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-      "Vendas": Number(v.toFixed(2)),
-    }));
+    .map(([d, typeMap]) => {
+      const total = Object.values(typeMap).reduce((s, v) => s + v, 0);
+      const segments = allPayTypes
+        .map((t, i) => ({ label: t, value: Number((typeMap[t] || 0).toFixed(2)), color: DONUT_COLORS[t] || ["#8b5cf6","#ec4899","#06b6d4"][i%3] }))
+        .filter(s => s.value > 0);
+      return {
+        dia: new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        "Vendas": Number(total.toFixed(2)),
+        segments,
+      };
+    });
 
   // Top produtos
   const prodMap = {};
@@ -87,6 +100,19 @@ export default function Reports() {
     });
   });
   const topProds = Object.values(prodMap).sort((a, b) => b.total - a.total).slice(0, 5);
+
+  // Por forma de pagamento
+  const pmMap = {};
+  sales.forEach(s => {
+    const name = s.payment_methods?.name || "Outros";
+    pmMap[name] = (pmMap[name] || 0) + Number(s.total_amount);
+  });
+  const paymentDonut = Object.entries(pmMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, value], i) => ({
+      label, value,
+      color: DONUT_COLORS[label] || ["#8b5cf6","#ec4899","#06b6d4"][i % 3],
+    }));
 
   const toggleExpand = (id) => setExpanded(e => ({ ...e, [id]: !e[id] }));
 
@@ -139,7 +165,7 @@ export default function Reports() {
         ))}
       </div>
 
-      {/* Chart + Top produtos */}
+      {/* Chart + Top produtos + Donut */}
       {sales.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="card lg:col-span-2">
@@ -178,6 +204,16 @@ export default function Reports() {
                 })}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Donut — por forma de pagamento */}
+      {sales.length > 0 && paymentDonut.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="card">
+            <h3 className="text-h3 mb-4">Por forma de pagamento</h3>
+            <DonutChart data={paymentDonut} size={150} />
           </div>
         </div>
       )}
