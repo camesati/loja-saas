@@ -172,7 +172,7 @@ export default function PDV() {
                   <button
                     key={p.id}
                     onClick={() => addToCart(p)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 text-left border-b border-border last:border-0 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-left border-b border-border last:border-0 transition-colors hover:bg-hover-row"
                   >
                     <div>
                       <span className="text-xs text-muted mr-2">{p.sku}</span>

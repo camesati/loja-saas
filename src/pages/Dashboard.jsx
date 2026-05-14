@@ -1,21 +1,65 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { db } from "../config/supabase.js";
-import { BarChart } from "@tremor/react";
 import {
   TrendingUp, Users, Package, ShoppingBag,
   ArrowRight, Clock, BarChart2,
 } from "lucide-react";
+import ArrowBarChart from "../components/ArrowBarChart.jsx";
 
 const fmt = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 const fmtDate = (d) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+const fmtDateLong = (d) => d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
 
 const KPI_VARIANTS = [
-  { icon: TrendingUp,  label: "Vendas Hoje",      key: "hoje",     variant: "blue",   iconColor: "var(--c-accent)" },
-  { icon: ShoppingBag, label: "Vendas do Mês",    key: "mes",      variant: "green",  iconColor: "var(--c-success)" },
-  { icon: Package,     label: "Itens em Estoque", key: "estoque",  variant: "orange", iconColor: "var(--c-warning)" },
-  { icon: Users,       label: "Clientes",         key: "clientes", variant: "purple", iconColor: "#7C3AED" },
+  { icon: TrendingUp,  label: "Vendas Hoje",      key: "hoje",     variant: "blue",   iconColor: "var(--c-kpi-blue-icon)" },
+  { icon: ShoppingBag, label: "Vendas do Mês",    key: "mes",      variant: "green",  iconColor: "var(--c-kpi-green-icon)" },
+  { icon: Package,     label: "Itens em Estoque", key: "estoque",  variant: "orange", iconColor: "var(--c-kpi-orange-icon)" },
+  { icon: Users,       label: "Clientes",         key: "clientes", variant: "purple", iconColor: "var(--c-kpi-purple-icon)" },
 ];
+
+const PERIODS = [
+  { key: "7d",  label: "7 dias" },
+  { key: "30d", label: "30 dias" },
+  { key: "mes", label: "Mês atual" },
+  { key: "tri", label: "Trimestre" },
+  { key: "sem", label: "Semestre" },
+  { key: "ano", label: "Ano" },
+];
+
+function getDateRange(period) {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  switch (period) {
+    case "7d": {
+      const from = new Date(today); from.setDate(from.getDate() - 6);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "day", count: 7 };
+    }
+    case "30d": {
+      const from = new Date(today); from.setDate(from.getDate() - 29);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "day", count: 30 };
+    }
+    case "mes": {
+      const from = new Date(today.getFullYear(), today.getMonth(), 1);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "day", count: today.getDate() };
+    }
+    case "tri": {
+      const from = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "month", count: 3 };
+    }
+    case "sem": {
+      const from = new Date(today.getFullYear(), today.getMonth() - 5, 1);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "month", count: 6 };
+    }
+    case "ano": {
+      const from = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+      return { from: from.toISOString().split("T")[0], to: todayStr, groupBy: "month", count: 12 };
+    }
+    default:
+      return { from: todayStr, to: todayStr, groupBy: "day", count: 1 };
+  }
+}
 
 function KPICard({ icon: Icon, label, value, variant, iconColor, delay = 0 }) {
   return (
@@ -48,42 +92,34 @@ export default function Dashboard({ setPage }) {
   const token = session?.access_token;
   const uid = session?.user?.id;
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const dateLabel = fmtDateLong(new Date());
+
   const [kpi, setKpi] = useState({ hoje: 0, mes: 0, estoque: 0, clientes: 0 });
   const [recentSales, setRecentSales] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartPeriod, setChartPeriod] = useState("7d");
 
-  useEffect(() => { if (uid) loadAll(); }, [uid]);
+  useEffect(() => { if (uid) loadKpis(); }, [uid]);
+  useEffect(() => { if (uid) loadChartData(chartPeriod); }, [uid, chartPeriod]);
 
-  const loadAll = async () => {
+  const loadKpis = async () => {
     setLoading(true);
     try {
       const today = new Date().toISOString().split("T")[0];
       const firstDay = new Date(); firstDay.setDate(1);
       const firstDayStr = firstDay.toISOString().split("T")[0];
 
-      const [salesHojeArr, salesMesArr, products, clientes, sales, salesWeek] = await Promise.all([
+      const [salesHojeArr, salesMesArr, products, clientes, sales] = await Promise.all([
         db.get("sales", `user_id=eq.${uid}&created_at=gte.${today}T00:00:00&select=total_amount`, token),
         db.get("sales", `user_id=eq.${uid}&created_at=gte.${firstDayStr}T00:00:00&select=total_amount`, token),
         db.get("products", `user_id=eq.${uid}&select=quantity`, token),
         db.get("customers", `user_id=eq.${uid}&select=id`, token),
         db.get("sales", `user_id=eq.${uid}&order=created_at.desc&limit=6&select=id,sale_number,total_amount,created_at,customers(name),payment_methods(name)`, token),
-        db.get("sales", `user_id=eq.${uid}&created_at=gte.${(() => { const d = new Date(); d.setDate(d.getDate()-6); return d.toISOString().split("T")[0]; })()}T00:00:00&select=total_amount,created_at`, token),
       ]);
-
-      const days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(); d.setDate(d.getDate() - (6 - i));
-        return d.toISOString().split("T")[0];
-      });
-      const chartMap = {};
-      salesWeek.forEach(s => {
-        const day = s.created_at.split("T")[0];
-        chartMap[day] = (chartMap[day] || 0) + Number(s.total_amount);
-      });
-      const chart = days.map(d => ({
-        dia: new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit" }),
-        "Vendas": Number((chartMap[d] || 0).toFixed(2)),
-      }));
 
       setKpi({
         hoje:     salesHojeArr.reduce((s, r) => s + Number(r.total_amount), 0),
@@ -92,24 +128,86 @@ export default function Dashboard({ setPage }) {
         clientes: clientes.length,
       });
       setRecentSales(sales);
-      setChartData(chart);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
 
+  const loadChartData = async (period) => {
+    if (!uid) return;
+    setChartLoading(true);
+    try {
+      const { from, to, groupBy, count } = getDateRange(period);
+      const sales = await db.get(
+        "sales",
+        `user_id=eq.${uid}&created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&select=total_amount,created_at`,
+        token
+      );
+
+      if (groupBy === "day") {
+        const allDays = [];
+        const cursor = new Date(from + "T12:00:00");
+        const end = new Date(to + "T12:00:00");
+        while (cursor <= end) {
+          allDays.push(cursor.toISOString().split("T")[0]);
+          cursor.setDate(cursor.getDate() + 1);
+        }
+
+        const dayMap = {};
+        sales.forEach(s => {
+          const day = s.created_at.split("T")[0];
+          dayMap[day] = (dayMap[day] || 0) + Number(s.total_amount);
+        });
+
+        // Para 30 dias, mostrar label mais curto (dia/mês)
+        const labelFmt = count <= 7
+          ? { weekday: "short", day: "2-digit" }
+          : { day: "2-digit", month: "2-digit" };
+
+        setChartData(allDays.map(d => ({
+          dia: new Date(d + "T12:00:00").toLocaleDateString("pt-BR", labelFmt),
+          "Vendas": Number((dayMap[d] || 0).toFixed(2)),
+        })));
+      } else {
+        // Agrupamento por mês
+        const monthMap = {};
+        sales.forEach(s => {
+          const d = new Date(s.created_at);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          monthMap[key] = (monthMap[key] || 0) + Number(s.total_amount);
+        });
+
+        const startDate = new Date(from + "T12:00:00");
+        const allMonths = Array.from({ length: count }, (_, i) => {
+          return new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+        });
+
+        setChartData(allMonths.map(d => {
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          return {
+            dia: d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+            "Vendas": Number((monthMap[key] || 0).toFixed(2)),
+          };
+        }));
+      }
+    } catch (e) { console.error(e); }
+    finally { setChartLoading(false); }
+  };
+
   const hasChart = chartData.some(d => d["Vendas"] > 0);
+  const periodLabel = PERIODS.find(p => p.key === chartPeriod)?.label || "";
+  const chartTotal = chartData.reduce((s, d) => s + d["Vendas"], 0);
 
   return (
-    <div className="flex flex-col gap-section">
+    <div className="flex flex-col gap-8">
 
-      {/* Cabeçalho */}
+      {/* Cabeçalho com saudação */}
       <div className="anim-in">
-        <h2 className="page-title">Dashboard</h2>
-        <p className="page-subtitle">Visão geral do seu negócio</p>
+        <h2 className="text-h1">{greeting}! 👋</h2>
+        <p className="text-sm-ui mt-0.5 capitalize">{dateLabel} · Visão geral do negócio</p>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {loading
           ? KPI_VARIANTS.map((_, i) => <KPISkeleton key={i} delay={i * 60} />)
           : KPI_VARIANTS.map((v, i) => (
@@ -119,38 +217,50 @@ export default function Dashboard({ setPage }) {
       </div>
 
       {/* Gráfico + Últimas vendas */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] gap-6">
 
         {/* Card do gráfico */}
         <div className="card anim-in-1 flex flex-col">
-          <div className="flex items-center justify-between mb-5">
+
+          {/* Header do gráfico */}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
             <div>
-              <div className="text-h3">Vendas — últimos 7 dias</div>
+              <div className="text-h3">Vendas</div>
               <div className="text-sm-ui mt-0.5">
-                Total: {loading ? "—" : fmt(chartData.reduce((s, d) => s + d["Vendas"], 0))}
+                {chartLoading ? "Carregando..." : `Total: ${fmt(chartTotal)}`}
               </div>
+            </div>
+
+            {/* Seletor de período */}
+            <div className="flex flex-wrap gap-1">
+              {PERIODS.map(p => (
+                <button
+                  key={p.key}
+                  onClick={() => setChartPeriod(p.key)}
+                  className={chartPeriod === p.key ? "btn-primary btn-sm" : "btn-secondary btn-sm"}
+                  style={{ minHeight: 28, padding: "4px 10px", fontSize: 11 }}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {loading ? (
-            <div className="skeleton" style={{ height: 224, borderRadius: "var(--radius-md)" }} />
+          {/* Gráfico */}
+          {chartLoading ? (
+            <div className="skeleton" style={{ height: 236, borderRadius: "var(--radius-md)" }} />
           ) : hasChart ? (
-            <BarChart
-              data={chartData}
-              index="dia"
-              categories={["Vendas"]}
-              colors={["blue"]}
-              valueFormatter={(v) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
-              showLegend={false}
-              showGridLines={true}
-              className="h-56"
-            />
+            <ArrowBarChart data={chartData} />
           ) : (
-            <div className="h-56 flex flex-col items-center justify-center gap-2.5">
-              <div className="kpi-icon-wrap kpi-card--blue">
-                <BarChart2 size={22} color="var(--c-accent)" />
+            <div className="h-56 flex flex-col items-center justify-center gap-3">
+              <div className="flex items-center justify-center rounded-xl"
+                style={{ width: 56, height: 56, background: "var(--c-kpi-blue-bg)" }}>
+                <BarChart2 size={28} color="var(--c-kpi-blue-icon)" />
               </div>
-              <span className="text-sm-ui font-medium">Nenhuma venda nos últimos 7 dias</span>
+              <span className="text-sm-ui font-medium">Nenhuma venda em {periodLabel.toLowerCase()}</span>
+              <button className="btn-primary btn-sm" onClick={() => setPage("pdv")}>
+                Registrar primeira venda
+              </button>
             </div>
           )}
         </div>
@@ -226,10 +336,7 @@ export default function Dashboard({ setPage }) {
       <div className="card anim-in-3 flex flex-wrap items-center gap-4">
         <span className="text-h3 shrink-0">Acesso rápido</span>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setPage("pdv")}
-            className="btn-primary btn-sm"
-          >
+          <button onClick={() => setPage("pdv")} className="btn-primary btn-sm">
             Nova Venda
           </button>
           {[
@@ -241,10 +348,7 @@ export default function Dashboard({ setPage }) {
               key={p}
               onClick={() => setPage(p)}
               className="btn-sm transition-all"
-              style={{
-                background: bg, color, border: "1.5px solid transparent",
-                fontFamily: "var(--font-sans)", cursor: "pointer",
-              }}
+              style={{ background: bg, color, border: "1.5px solid transparent", fontFamily: "var(--font-sans)", cursor: "pointer" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = color; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "transparent"; }}
             >

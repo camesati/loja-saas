@@ -105,7 +105,7 @@ export default function Login() {
             <div
               className="anim-in rounded-xl text-[13px] mb-4"
               style={{ padding: "10px 14px", background: "var(--c-danger-bg)",
-                border: "1.5px solid #FECACA", color: "#991B1B" }}
+                border: "1.5px solid var(--c-danger-border)", color: "var(--c-danger-text)" }}
             >
               {error}
             </div>
@@ -114,7 +114,7 @@ export default function Login() {
             <div
               className="anim-in rounded-xl text-[13px] mb-4"
               style={{ padding: "10px 14px", background: "var(--c-success-bg)",
-                border: "1.5px solid #A7F3D0", color: "#065F46" }}
+                border: "1.5px solid var(--c-success-border)", color: "var(--c-success-text)" }}
             >
               {success}
             </div>

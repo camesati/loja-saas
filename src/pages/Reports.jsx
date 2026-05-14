@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { db } from "../config/supabase.js";
-import { BarChart } from "@tremor/react";
+import ArrowBarChart from "../components/ArrowBarChart.jsx";
 import { Search, ChevronDown, ChevronUp, FileText } from "lucide-react";
 
 const fmt = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -74,7 +74,7 @@ export default function Reports() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([d, v]) => ({
       dia: new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-      "Vendas (R$)": Number(v.toFixed(2)),
+      "Vendas": Number(v.toFixed(2)),
     }));
 
   // Top produtos
@@ -144,15 +144,7 @@ export default function Reports() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="card lg:col-span-2">
             <h3 className="text-sm font-semibold text-text mb-4">Vendas por dia</h3>
-            <BarChart
-              data={chartData}
-              index="dia"
-              categories={["Vendas (R$)"]}
-              colors={["blue"]}
-              valueFormatter={(v) => `R$ ${v.toFixed(2)}`}
-              showLegend={false}
-              className="h-44"
-            />
+            <ArrowBarChart data={chartData} height={176} />
           </div>
           <div className="card">
             <h3 className="text-h3 mb-4">Top produtos</h3>
